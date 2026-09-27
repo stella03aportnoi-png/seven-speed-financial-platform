@@ -1691,13 +1691,13 @@ function UsersPage({ users, setUsers }) {
                 <td className="p-3 text-xs">{u.lastLogin ? u.lastLogin.slice(0, 10) : "Never"}</td>
                 <td className="p-3">
                   <span className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: u.enabled ? "#dcfce7" : "#fee2e2", color: u.enabled ? "#16a34a" : RED }}>
-                    {u.enabled ? "Active" : "Disabled"}
+                    {u.enabled ? "Aprovado" : "Pendente"}
                   </span>
                 </td>
                 <td className="p-3 flex gap-2">
                   {u.role !== "Administrator" && (
                     <>
-                      <button onClick={() => toggleEnabled(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200">{u.enabled ? "Disable" : "Enable"}</button>
+                      <button onClick={() => toggleEnabled(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200">{u.enabled ? "Bloquear" : "Aprovar"}</button>
                       <button onClick={() => resetPassword(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200">Reset PW</button>
                       <button onClick={() => removeUser(u.id)} className="text-gray-400 hover:text-red-600"><Trash2 size={14} /></button>
                     </>
@@ -1786,7 +1786,13 @@ class ErrorBoundary extends React.Component {
 function HubScreen({ user, onSelect, onLogout }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ background: `linear-gradient(135deg, #0b0b0d, #1f2937)` }}>
-      <div className="absolute top-6 right-6">
+      <div className="absolute top-6 right-6 flex items-center gap-6">
+        {/* Este botão só aparece se a pessoa for Administrador */}
+        {user.role === 'Administrator' && (
+          <button onClick={() => onSelect('admin')} className="text-gray-500 hover:text-white text-sm font-semibold flex items-center gap-2" title="Aprovar utilizadores">
+            <UserCog size={16} /> Acessos
+          </button>
+        )}
         <button onClick={onLogout} className="text-gray-400 hover:text-white text-sm font-semibold flex items-center gap-2">
           <LogOut size={16} /> Sair
         </button>
@@ -1876,16 +1882,16 @@ function AppInner() {
 
   function handleRegister({ name, email, password }) {
     if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      setRegError("An account with this email already exists.");
+      setRegError("Este e-mail já está cadastrado.");
       return;
     }
-    const newUser = { id: uid(), name, email, password: btoa(password), role: "Read Only", enabled: true, createdAt: new Date().toISOString(), lastLogin: new Date().toISOString() };
+    // Cria o utilizador como "Visitor" e com enabled = false (Pendente de Aprovação)
+    const newUser = { id: uid(), name, email, password: btoa(password), role: "Visitor", enabled: false, createdAt: new Date().toISOString(), lastLogin: null };
     const updated = [...users, newUser];
     setUsers(updated);
-    setSession(newUser);
-    saveJSON("ss_session", { id: newUser.id });
-    setRegError("");
-    setPage("dashboard");
+    
+    // Mostra mensagem de sucesso, mas NÃO faz login (setSession removido)
+    setRegError("Acesso solicitado! Aguarde a aprovação do Administrador.");
   }
 
   function handleLogout() {
@@ -1905,7 +1911,7 @@ function AppInner() {
   }
 
   const ws = workspaces[session.id] || emptyWorkspace();
-  const canEdit = session.role !== "Read Only";
+  const canEdit = session.role === "Administrator";
   const pageLabel = (MENU.find(m => m.key === page)?.label) || (page === "users" ? "User Management" : "Dashboard");
 
   // Se o utilizador não escolheu nenhum módulo, mostra os 2 quadrados
@@ -1913,11 +1919,30 @@ function AppInner() {
     return <HubScreen user={session} onSelect={setActiveModule} onLogout={handleLogout} />;
   }
 
-  // Se o utilizador escolheu a Captação, mostramos o ficheiro HTML dentro de um iframe
+  // NOVA TELA ESCONDIDA DE APROVAÇÃO (Só para o Administrador)
+  if (activeModule === 'admin' && session.role === 'Administrator') {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-[#0b0b0d] text-white px-5 py-3 flex justify-between items-center shadow-md">
+          <span className="font-bold text-sm flex items-center gap-2"><UserCog size={18}/> Gestão de Acessos</span>
+          <button onClick={() => setActiveModule(null)} className="text-xs font-semibold px-4 py-2 rounded transition" style={{ backgroundColor: RED }}>
+            Voltar ao Portal
+          </button>
+        </div>
+        <div className="p-6 max-w-5xl mx-auto w-full">
+           <Card className="p-6 mb-4">
+             <h2 className="text-lg font-bold mb-2">Aprovação de Visitantes</h2>
+             <p className="text-sm text-gray-500">Controle quem tem acesso à plataforma. Os visitantes aprovados terão acesso apenas em modo de visualização (Read-Only).</p>
+           </Card>
+           <UsersPage users={users} setUsers={setUsers} />
+        </div>
+      </div>
+    );
+  }
+
   if (activeModule === 'captacao') {
     return (
       <div className="w-full h-screen flex flex-col">
-        {/* Barra superior preta para conseguir voltar ao menu */}
         <div className="bg-[#0b0b0d] text-white px-5 py-3 flex justify-between items-center shadow-md z-10">
           <span className="font-bold text-sm flex items-center gap-3">
             <div className="w-7 h-7 rounded flex items-center justify-center font-black text-xs" style={{ backgroundColor: RED }}>7S</div>
@@ -1927,8 +1952,8 @@ function AppInner() {
             Voltar ao Menu
           </button>
         </div>
-        {/* Carrega o HTML da captação em ecrã inteiro */}
-        <iframe src="/captacao.html" className="w-full flex-1 border-0" title="Captação Seven Speed"></iframe>
+        {/* Passamos a role (cargo) na URL para o HTML saber se deve bloquear os botões */}
+        <iframe src={`/captacao.html?role=${session.role}`} className="w-full flex-1 border-0" title="Captação"></iframe>
       </div>
     );
   }

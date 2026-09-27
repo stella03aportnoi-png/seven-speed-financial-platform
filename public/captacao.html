@@ -1762,5 +1762,28 @@ document.getElementById('btn-calc').addEventListener('click', ()=>{
 
 loadData();
 </script>
+<script>
+  // Bloqueio de Edição para Visitantes
+  if (window.location.search.includes('role=Visitor')) {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      /* Esconde os botões de adicionar, editar, salvar e excluir */
+      button.btn:not(.nav-btn), 
+      button.quota-edit-btn, 
+      button[id^="d-delete"],
+      [data-del-sponsor], [data-del-post], [data-del-roi], [data-del-comp], [data-del-opp], [data-del-act], [data-del-case] { 
+        display: none !important; 
+      }
+      /* Desativa os campos de texto e selects para não poderem ser alterados */
+      input, select, textarea { 
+        pointer-events: none !important; 
+        opacity: 0.7; 
+      }
+      /* Mantém os filtros (chips) clicáveis para eles poderem ver os dados */
+      .chip { pointer-events: auto !important; opacity: 1; }
+    `;
+    document.head.appendChild(style);
+  }
+</script>
 </body>
 </html>
