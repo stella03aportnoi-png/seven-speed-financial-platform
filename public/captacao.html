@@ -613,16 +613,36 @@ function fmtNum(n){ return (Number(n)||0).toLocaleString('pt-BR'); }
 function cls(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
 async function storageGet(key){
-  try{
-    if(window.storage){ const r = await window.storage.get(key); if(r && r.value) return r.value; }
-  }catch(e){ console.warn('window.storage indisponível, tentando localStorage', e); }
-  try{ return localStorage.getItem(key); }catch(e){ return null; }
+  try {
+    const res = await fetch(`/api/db?key=${key}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    // A API devolve um objeto, mas o código antigo da captação espera uma string para fazer o parse. 
+    // Por isso, convertemos de volta para string aqui:
+    return data.value ? (typeof data.value === 'string' ? data.value : JSON.stringify(data.value)) : null;
+  } catch(e) { 
+    console.error('Erro ao buscar do banco:', e);
+    return null; 
+  }
 }
+
 async function storageSet(key, value){
-  let ok = false;
-  try{ if(window.storage){ await window.storage.set(key, value); ok = true; } }catch(e){ console.warn('Falha ao salvar em window.storage', e); }
-  try{ localStorage.setItem(key, value); ok = true; }catch(e){ console.warn('Falha ao salvar em localStorage', e); }
-  return ok;
+  // O código antigo manda o valor já como string. 
+  // Transformamos em objeto para a API gravar de forma limpa no Postgres.
+  let parsedValue = value;
+  try { parsedValue = JSON.parse(value); } catch(e) {}
+
+  try {
+    await fetch(`/api/db`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value: parsedValue })
+    });
+    return true;
+  } catch(e) { 
+    console.error('Erro ao salvar no banco:', e);
+    return false; 
+  }
 }
 
 async function loadData(){
