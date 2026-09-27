@@ -1787,18 +1787,24 @@ function HubScreen({ user, onSelect, onLogout }) {
       
       <div className="flex gap-6 flex-wrap justify-center">
         {/* Quadrado 1: Financeiro */}
-        <Card className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white" onClick={() => onSelect('financial')}>
+        <div 
+          className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white rounded-2xl shadow-sm border border-gray-100" 
+          onClick={() => onSelect('financial')}
+        >
           <Wallet size={56} color="#D90429" className="mb-4" />
           <h2 className="text-xl font-bold text-gray-800">Financeiro</h2>
           <p className="text-xs text-gray-500 text-center mt-2">ERP, Orçamentos, Cash Flow e Transações</p>
-        </Card>
+        </div>
         
         {/* Quadrado 2: Captação */}
-        <Card className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white" onClick={() => onSelect('captacao')}>
+        <div 
+          className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white rounded-2xl shadow-sm border border-gray-100" 
+          onClick={() => onSelect('captacao')}
+        >
           <Target size={56} color="#D90429" className="mb-4" />
           <h2 className="text-xl font-bold text-gray-800">Captação</h2>
           <p className="text-xs text-gray-500 text-center mt-2">Patrocinadores, Hierarquia, CRM e AIDA</p>
-        </Card>
+        </div>
       </div>
     </div>
   );
