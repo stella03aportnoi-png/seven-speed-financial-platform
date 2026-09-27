@@ -1664,41 +1664,69 @@ function DocumentsPage({ ws, updateWs, canEdit }) {
 function UsersPage({ users, setUsers }) {
   const [search, setSearch] = useState("");
   const filtered = users.filter(u => (u.name + u.email).toLowerCase().includes(search.toLowerCase()));
+  
   function toggleEnabled(id) { setUsers(users.map(u => u.id === id ? { ...u, enabled: !u.enabled } : u)); }
   function removeUser(id) { setUsers(users.filter(u => u.id !== id)); }
   function resetPassword(id) {
     const newPw = Math.random().toString(36).slice(2, 8);
     setUsers(users.map(u => u.id === id ? { ...u, password: btoa(newPw) } : u));
-    alert(`New temporary password: ${newPw}`);
+    alert(`Nova senha temporária: ${newPw}`);
   }
+  
+  // NOVA FUNÇÃO: Altera o perfil do utilizador
+  function changeRole(id, newRole) {
+    setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="relative max-w-xs">
         <Search size={14} className="absolute left-3 top-2.5 text-gray-400" />
-        <input className={inputCls + " pl-8"} placeholder="Search users" value={search} onChange={e => setSearch(e.target.value)} />
+        <input className={inputCls + " pl-8"} placeholder="Buscar utilizador" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
       <Card className="p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-xs text-gray-500 border-b border-gray-100">
-            <th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Role</th>
-            <th className="p-3">Created</th><th className="p-3">Last Login</th><th className="p-3">Status</th><th className="p-3">Actions</th>
+            <th className="p-3">Nome</th><th className="p-3">E-mail</th><th className="p-3">Perfil</th>
+            <th className="p-3">Criado em</th><th className="p-3">Último Login</th><th className="p-3">Status</th><th className="p-3">Ações</th>
           </tr></thead>
           <tbody>
             {filtered.map(u => (
               <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50">
-                <td className="p-3">{u.name}</td><td className="p-3">{u.email}</td><td className="p-3">{u.role}</td>
-                <td className="p-3 text-xs">{(u.createdAt || "").slice(0, 10)}</td>
-                <td className="p-3 text-xs">{u.lastLogin ? u.lastLogin.slice(0, 10) : "Never"}</td>
+                <td className="p-3">{u.name}</td><td className="p-3">{u.email}</td>
+                
+                {/* COLUNA DE PERFIL ATUALIZADA */}
                 <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: u.enabled ? "#dcfce7" : "#fee2e2", color: u.enabled ? "#16a34a" : RED }}>
+                  {u.email === 'stella.03aportnoi@gmail.com' ? (
+                    <span className="text-gray-500 font-semibold">Administrador</span>
+                  ) : (
+                    <select 
+                      className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-red-500 bg-white"
+                      value={u.role} 
+                      onChange={e => changeRole(u.id, e.target.value)}
+                    >
+                      <option value="Visitor">Visitante (Leitura)</option>
+                      <option value="Administrator">Administrador</option>
+                    </select>
+                  )}
+                </td>
+                
+                <td className="p-3 text-xs">{(u.createdAt || "").slice(0, 10)}</td>
+                <td className="p-3 text-xs">{u.lastLogin ? u.lastLogin.slice(0, 10) : "Nunca"}</td>
+                
+                <td className="p-3">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: u.enabled ? "#dcfce7" : "#fee2e2", color: u.enabled ? "#16a34a" : RED }}>
                     {u.enabled ? "Aprovado" : "Pendente"}
                   </span>
                 </td>
+                
                 <td className="p-3 flex gap-2">
-                  {u.role !== "Administrator" && (
+                  {u.email !== 'stella.03aportnoi@gmail.com' && (
                     <>
-                      <button onClick={() => toggleEnabled(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200">{u.enabled ? "Bloquear" : "Aprovar"}</button>
-                      <button onClick={() => resetPassword(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200">Reset PW</button>
+                      <button onClick={() => toggleEnabled(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-100">
+                        {u.enabled ? "Bloquear" : "Aprovar"}
+                      </button>
+                      <button onClick={() => resetPassword(u.id)} className="text-xs px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-100">Reset Senha</button>
                       <button onClick={() => removeUser(u.id)} className="text-gray-400 hover:text-red-600"><Trash2 size={14} /></button>
                     </>
                   )}
@@ -1859,15 +1887,16 @@ function AppInner() {
   useEffect(() => {
     if (!session) return;
     (async () => {
-      const ws = await loadJSON(`ss_workspace_${session.id}`, null);
-      setWorkspaces(w => ({ ...w, [session.id]: normalizeWorkspace(ws) }));
+      // Usamos a chave do admin para aproveitar os dados que já inseriu
+      const ws = await loadJSON(`ss_workspace_admin-seed`, null);
+      setWorkspaces(w => ({ ...w, shared: normalizeWorkspace(ws) }));
     })();
   }, [session]);
 
   function updateWorkspace(next) {
     setWorkspaces(w => {
-      const merged = { ...w, [session.id]: next };
-      saveJSON(`ss_workspace_${session.id}`, next);
+      const merged = { ...w, shared: next };
+      saveJSON(`ss_workspace_admin-seed`, next);
       return merged;
     });
   }
@@ -1910,7 +1939,7 @@ function AppInner() {
       : <RegisterScreen onRegister={handleRegister} onBack={() => { setAuthView("login"); setRegError(""); }} error={regError} />;
   }
 
-  const ws = workspaces[session.id] || emptyWorkspace();
+  const ws = workspaces.shared || emptyWorkspace();
   const canEdit = session.role === "Administrator";
   const pageLabel = (MENU.find(m => m.key === page)?.label) || (page === "users" ? "User Management" : "Dashboard");
 
