@@ -44,19 +44,26 @@ const CHART_COLORS = [RED, "#111827", "#6b7280", "#9ca3af", "#D90429aa", "#37415
 /* ---------- storage helpers ---------- */
 async function loadJSON(key, fallback) {
   try {
-    const raw = window.localStorage.getItem(key);
-    if (raw === null) return fallback;
-    return JSON.parse(raw);
+    const res = await fetch(`/api/db?key=${key}`);
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    return data.value ? data.value : fallback;
   } catch (e) {
+    console.error("Falha ao carregar da nuvem", e);
     return fallback;
   }
 }
+
 async function saveJSON(key, value) {
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    await fetch(`/api/db`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value })
+    });
     return true;
   } catch (e) {
-    console.error("local storage save failed", e);
+    console.error("Falha ao salvar na nuvem", e);
     return false;
   }
 }
