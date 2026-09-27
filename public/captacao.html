@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seven Speed — Sponsorship Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#D90429; --red-glow:rgba(217,4,41,0.15);
+  --black:#0b0b0d; --gray-dark:#ffffff; --gray:#6b7280;
+  --white:#1f2937;
+  --glass:#ffffff; --glass-strong:#f9fafb; --glass-border:#f3f4f6;
+  --green:#16a34a; --amber:#d97706; --blue:#2563eb; --gold:#ca8a04;
+  --font:'Poppins',sans-serif; --mono:'Poppins',sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:var(--font); color:var(--white); min-height:100vh;
+  background:#f9fafb;
+  display:flex;
+}
+.glass{ background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }
+
+/* Sidebar */
+#sidebar{ width:240px; height:100vh; overflow-y:auto; padding:20px 12px; background:#0b0b0d; position:sticky; top:0; align-self:flex-start; }
+.brand{ display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:8px; }
+.brand .dot{ width:36px; height:36px; background:var(--red); border-radius:10px; box-shadow:none; display:flex; align-items:center; justify-content:center; }
+.brand .dot::before{ content:"7S"; color:#fff; font-weight:800; font-size:13px; }
+.brand span{ font-weight:700; font-size:14px; color:#ffffff; }
+nav.tabs{ display:flex; flex-direction:column; gap:2px; }
+.nav-btn{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; border:none; background:transparent; color:#9ca3af; font-family:var(--font); font-size:13px; cursor:pointer; text-align:left; width:100%; transition:background .15s, color .15s; }
+.nav-btn:hover{ background:rgba(255,255,255,0.06); color:#ffffff; }
+.nav-btn.active{ background:var(--red); color:#ffffff; }
+#sidebar .btn.ghost{ background:rgba(255,255,255,0.06); color:#9ca3af; border:1px solid rgba(255,255,255,0.12); }
+#sidebar .btn.ghost:hover{ color:#fff; border-color:var(--red); }
+#sidebar div[style*="background:var(--glass-border)"]{ background:rgba(255,255,255,0.1) !important; }
+
+/* Main */
+#main{ flex:1; padding:32px 32px 90px; max-width:1280px; }
+.page{ display:none; }
+.page.active{ display:block; }
+.page-head{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.page-head h1{ font-size:22px; font-weight:700; }
+.page-head p{ color:var(--gray); font-size:13px; margin-top:2px; }
+
+.kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
+.kpi{ padding:18px; }
+.kpi .l{ font-size:11.5px; color:var(--gray); margin-bottom:8px; }
+.kpi .v{ font-family:var(--mono); font-size:22px; font-weight:600; }
+.kpi .v.red{ color:var(--red); }
+.kpi .v.green{ color:var(--green); }
+
+.section{ padding:24px; margin-bottom:24px; }
+.section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+.section-head h2{ font-size:15px; font-weight:600; }
+
+.dist-row{ display:flex; align-items:center; gap:10px; font-size:12px; margin-bottom:10px; }
+.dist-label{ width:110px; color:var(--gray); }
+.dist-bar{ flex:1; height:8px; background:var(--glass-strong); border-radius:99px; overflow:hidden; }
+.dist-fill{ height:100%; background:var(--red); }
+.dist-val{ width:40px; text-align:right; font-family:var(--mono); }
+
+.btn{ background:var(--red); color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:600; font-size:12.5px; cursor:pointer; box-shadow:none; font-family:var(--font); transition:filter .15s; }
+.btn:hover{ filter:brightness(1.1); }
+.btn.ghost{ background:#fff; box-shadow:none; color:var(--white); border:1px solid #e5e7eb; }
+.btn.ghost:hover{ color:var(--red); border-color:var(--red); }
+.btn.sm{ padding:6px 12px; font-size:11.5px; }
+
+.chip{ font-size:11.5px; padding:6px 13px; border-radius:999px; border:1px solid var(--glass-border); background:var(--glass); color:var(--gray); cursor:pointer; }
+.chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+.filters{ display:flex; gap:8px; flex-wrap:wrap; }
+
+/* Sponsors grid */
+.card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+.s-card{ padding:18px; cursor:pointer; transition:border-color .15s; }
+.s-card:hover{ border-color:var(--red); }
+.s-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.s-name{ font-weight:600; font-size:14.5px; }
+.s-cat{ color:var(--gray); font-size:11px; margin-top:2px; }
+.tier{ font-size:10px; padding:3px 9px; border-radius:999px; font-weight:600; white-space:nowrap; }
+.tier.ouro{ background:rgba(232,197,61,0.15); color:var(--gold); }
+.tier.prata{ background:rgba(201,201,209,0.15); color:#c9c9d1; }
+.tier.bronze{ background:rgba(201,122,61,0.15); color:#c97a3d; }
+.tier.outro{ background:rgba(77,143,232,0.15); color:var(--blue); }
+.progress-label{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--gray); margin-bottom:5px; }
+.progress{ height:6px; background:var(--glass-strong); border-radius:99px; overflow:hidden; margin-bottom:12px; }
+.progress-fill{ height:100%; background:var(--green); }
+.s-metrics{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+.s-metric{ background:var(--glass-strong); border-radius:8px; padding:8px; text-align:center; }
+.s-metric .m-l{ font-size:9.5px; color:var(--gray); }
+.s-metric .m-v{ font-family:var(--mono); font-size:13px; font-weight:600; margin-top:2px; }
+.status-row{ display:flex; justify-content:space-between; align-items:center; }
+.status{ font-size:10.5px; padding:4px 10px; border-radius:999px; font-weight:600; }
+.status.lead{ background:rgba(184,184,194,0.15); color:var(--gray); }
+.status.negociacao{ background:rgba(232,161,61,0.15); color:var(--amber); }
+.status.ativo{ background:rgba(77,143,232,0.15); color:var(--blue); }
+.status.renovado{ background:rgba(52,199,119,0.15); color:var(--green); }
+.status.perdido{ background:rgba(217,4,41,0.15); color:var(--red); }
+
+/* Forms */
+.form-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.form-grid .full{ grid-column:1/-1; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field label{ font-size:11px; color:var(--gray); }
+.field input, .field select, .field textarea{
+  background:#ffffff; border:1px solid #e5e7eb; border-radius:8px;
+  color:var(--white); padding:9px 11px; font-family:var(--font); font-size:13px;
+}
+.field textarea{ resize:vertical; min-height:44px; }
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+.field select option{ background:var(--gray-dark); }
+
+/* Detail panel */
+#overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; z-index:50; }
+#overlay.open{ display:flex; }
+#detail{ width:100%; max-width:900px; padding:0; background:#ffffff; border:1px solid var(--glass-border); border-radius:18px; overflow:hidden; }
+.detail-head{ padding:24px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:flex-start; }
+.detail-head h2{ font-size:19px; font-weight:700; }
+.detail-head p{ color:var(--gray); font-size:12.5px; margin-top:4px; }
+.close-btn{ background:var(--glass-strong); border:none; color:var(--gray); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:15px; }
+.close-btn:hover{ color:var(--red); }
+.detail-tabs{ display:flex; gap:4px; padding:0 24px; border-bottom:1px solid var(--glass-border); overflow-x:auto; }
+.d-tab{ background:none; border:none; color:var(--gray); font-family:var(--font); font-size:12.5px; padding:14px 14px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+.d-tab.active{ color:var(--white); border-color:var(--red); }
+.detail-body{ padding:24px; max-height:60vh; overflow-y:auto; }
+.d-panel{ display:none; }
+.d-panel.active{ display:block; }
+
+.mini-kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+.mini-kpi{ background:var(--glass-strong); border-radius:10px; padding:12px; }
+.mini-kpi .l{ font-size:10px; color:var(--gray); }
+.mini-kpi .v{ font-family:var(--mono); font-size:16px; font-weight:700; margin-top:3px; }
+
+table.data-table{ width:100%; border-collapse:collapse; }
+table.data-table th{ text-align:left; font-size:10.5px; color:var(--gray); font-weight:500; padding:8px 10px; border-bottom:1px solid var(--glass-border); }
+table.data-table td{ padding:10px; border-bottom:1px solid var(--glass-border); font-size:12.5px; }
+.empty-row{ color:var(--gray); font-size:12.5px; text-align:center; padding:24px; }
+
+.comp-row{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.comp-name{ width:140px; font-size:12.5px; }
+.comp-bar{ flex:1; height:8px; background:var(--glass-strong); border-radius:99px; overflow:hidden; }
+.comp-fill{ height:100%; }
+.comp-pct{ width:70px; text-align:right; font-family:var(--mono); font-size:12px; }
+
+/* Kanban */
+.kanban{ display:flex; gap:14px; overflow-x:auto; padding-bottom:8px; }
+.kcol{ min-width:230px; flex:1; }
+.kcol-head{ font-size:11.5px; color:var(--gray); margin-bottom:10px; display:flex; justify-content:space-between; padding:0 4px; }
+.kcard{ padding:12px; margin-bottom:10px; }
+.kcard .kname{ font-weight:600; font-size:13px; margin-bottom:6px; }
+.kcard .kmeta{ font-size:11px; color:var(--gray); margin-bottom:8px; }
+.kcard select{ width:100%; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:7px; color:var(--white); font-size:11px; padding:6px; font-family:var(--font); }
+
+/* Cotas */
+.tier-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+
+.quota-table{ width:100%; border-collapse:collapse; }
+.quota-table th{ text-align:left; font-size:11px; color:var(--gray); font-weight:600; text-transform:uppercase; letter-spacing:0.03em; padding:16px 22px; border-bottom:1px solid var(--glass-border); }
+.quota-table td{ padding:22px 22px; border-bottom:1px solid var(--glass-border); vertical-align:middle; }
+.quota-table tr:last-child td{ border-bottom:none; }
+.quota-table tr:hover td{ background:var(--glass-strong); }
+.quota-name{ font-size:16px; font-weight:700; color:var(--white); background:transparent; border:none; padding:0; width:100%; font-family:var(--font); }
+.quota-subtitle{ font-size:14px; color:var(--gray); background:transparent; border:none; padding:0; width:100%; font-family:var(--font); }
+.quota-value{ font-size:15px; font-weight:600; color:var(--white); font-family:var(--mono); }
+.quota-qty-row{ display:flex; align-items:center; gap:10px; }
+.quota-qty-input{ width:44px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:6px; color:var(--white); font-family:var(--mono); font-size:13px; padding:4px 6px; text-align:center; }
+.quota-badge{ font-size:11px; padding:5px 12px; border-radius:999px; font-weight:600; white-space:nowrap; }
+.quota-edit-btn{ background:none; border:1px solid var(--glass-border); border-radius:8px; color:var(--gray); font-size:11px; padding:6px 12px; cursor:pointer; font-family:var(--font); }
+.quota-edit-btn:hover{ color:var(--white); border-color:var(--red); }
+.quota-editor{ margin-top:14px; }
+.tier-card{ padding:20px; }
+.tier-card h3{ font-size:15px; margin-bottom:4px; }
+.tier-card .tval{ font-family:var(--mono); font-size:19px; font-weight:700; color:var(--red); margin-bottom:12px; }
+.tier-card textarea{ width:100%; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:9px; color:var(--white); padding:10px; font-family:var(--font); font-size:12px; min-height:120px; resize:vertical; }
+
+.empty-state{ text-align:center; color:var(--gray); font-size:13px; padding:50px 12px; grid-column:1/-1; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="brand"><div class="dot"></div><span>Seven Speed</span></div>
+  <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:18px;">
+    <button class="btn ghost sm" id="btn-export" style="width:100%;">Exportar dados</button>
+    <button class="btn ghost sm" id="btn-import" style="width:100%;">Importar dados</button>
+    <input type="file" id="import-file" accept="application/json" style="display:none;">
+    <div id="save-status" style="font-size:10px; color:#9ca3af; text-align:center; min-height:12px;"></div>
+  </div>
+  <nav class="tabs">
+    <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+
+    <div style="font-size:10px; color:var(--red); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin:18px 12px 6px;">Hierarquia &amp; Benefícios</div>
+    <button class="nav-btn" data-page="cotas">Hierarquia de Cotas</button>
+    <button class="nav-btn" data-page="valuation">Valuation de Ativos</button>
+    <button class="nav-btn" data-page="pilares">7 Pilares</button>
+    <button class="nav-btn" data-page="proposta">USP / UVP / Oportunidades</button>
+
+    <div style="font-size:10px; color:var(--red); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin:18px 12px 6px;">Variedade &amp; Relações</div>
+    <button class="nav-btn" data-page="patrocinadores">Patrocinadores</button>
+    <button class="nav-btn" data-page="pipeline">Pipeline de Negociação</button>
+    <button class="nav-btn" data-page="leads">Leads / Prospecção</button>
+    <button class="nav-btn" data-page="aida">AIDA</button>
+    <button class="nav-btn" data-page="vitrine">Vitrine (Ativos)</button>
+    <button class="nav-btn" data-page="parceiros">Por Categoria</button>
+
+    <div style="font-size:10px; color:var(--red); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin:18px 12px 6px;">ROI &amp; Atividades Criativas</div>
+    <button class="nav-btn" data-page="ativacoes">Brand Activation</button>
+    <button class="nav-btn" data-page="submarcas">Submarcas (interno)</button>
+    <button class="nav-btn" data-page="cases">Case Studies</button>
+    <button class="nav-btn" data-page="ciclo">Retroalimentação do Ciclo</button>
+  </nav>
+</div>
+
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-head">
+      <div><h1>Dashboard Geral</h1><p>Visão consolidada da área de patrocínios</p></div>
+    </div>
+    <div class="kpis" id="dash-kpis"></div>
+    <div class="section glass">
+      <div class="section-head"><h2>Distribuição por status</h2></div>
+      <div id="dash-status-dist"></div>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>ROI por patrocinador (top 5)</h2></div>
+      <div id="dash-roi-top"></div>
+    </div>
+  </div>
+
+  <!-- PATROCINADORES -->
+  <div class="page" id="page-patrocinadores">
+    <div class="page-head">
+      <div><h1>Patrocinadores</h1><p>Team partners — CRM e acompanhamento de entregas</p></div>
+      <button class="btn" id="btn-new-sponsor">+ Novo patrocinador</button>
+    </div>
+    <div class="section glass" id="new-sponsor-form" style="display:none;">
+      <div class="section-head"><h2>Cadastrar patrocinador</h2><button class="btn ghost sm" id="cancel-new-sponsor">Cancelar</button></div>
+      <form id="form-sponsor" class="form-grid">
+        <div class="field"><label>Nome da empresa</label><input type="text" id="sp-name"></div>
+        <div class="field"><label>Categoria da parceria</label><input type="text" id="sp-cat" placeholder="Ex: Fornecedor de materiais"></div>
+        <div class="field"><label>Cota</label><select id="sp-tier"><option>Ouro</option><option>Prata</option><option>Bronze</option><option>Outro</option></select></div>
+        <div class="field"><label>Status</label><select id="sp-status"><option>Negociação</option><option>Ativo</option><option>Renovado</option><option>Perdido</option><option>Lead</option></select></div>
+        <div class="field"><label>Tipo de relação</label><select id="sp-relation">
+          <option value="Patrocinador">Patrocinador — contribui pagando</option>
+          <option value="Parceiro">Parceiro — contribui em forma de serviço</option>
+          <option value="Apoiador">Apoiador — apoia, sem contrapartida formal</option>
+        </select></div>
+        <div class="field"><label>Tipo de contribuição</label><select id="sp-contrib-type"><option>Dinheiro</option><option>Serviço</option><option>Produto</option><option>Misto</option><option>Nenhuma</option></select></div>
+        <div class="field"><label>Valor (R$) — real ou estimado, se serviço/produto</label><input type="number" id="sp-invest" min="0" step="0.01"></div>
+        <div class="field full"><label>Descrição da contribuição (se serviço/produto)</label><input type="text" id="sp-contrib-desc" placeholder="Ex: usinagem de peças, transporte do carro, hospedagem em eventos"></div>
+        <div class="field"><label>Responsável Seven Speed</label><input type="text" id="sp-resp"></div>
+        <div class="field"><label>Início da parceria</label><input type="date" id="sp-start"></div>
+        <div class="field"><label>Vencimento / renovação</label><input type="date" id="sp-end"></div>
+        <div class="field"><label>Posts prometidos (total)</label><input type="number" id="sp-posts-goal" min="0" value="0"></div>
+        <div class="field full"><button type="button" id="form-sponsor-submit" class="btn">Salvar patrocinador</button></div>
+      </form>
+    </div>
+    <div class="section glass">
+      <div class="section-head">
+        <h2>Todos os patrocinadores</h2>
+        <div class="filters" id="sp-filters"></div>
+      </div>
+      <div class="card-grid" id="sp-grid"></div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="page-pipeline">
+    <div class="page-head"><div><h1>Pipeline de Negociação</h1><p>Acompanhe cada prospect da equipe do lead ao fechamento</p></div></div>
+    <div class="kanban" id="kanban-board"></div>
+  </div>
+
+  <!-- LEADS -->
+  <div class="page" id="page-leads">
+    <div class="page-head">
+      <div><h1>Leads / Prospecção</h1><p>Grade de potenciais patrocinadores</p></div>
+      <button class="btn" id="btn-new-lead">+ Novo lead</button>
+    </div>
+    <div class="section glass" id="new-lead-form" style="display:none;">
+      <div class="section-head"><h2>Cadastrar lead</h2><button class="btn ghost sm" id="cancel-new-lead">Cancelar</button></div>
+      <form id="form-lead" class="form-grid">
+        <div class="field"><label>Empresa</label><input type="text" id="ld-name"></div>
+        <div class="field"><label>Segmento</label><input type="text" id="ld-segment"></div>
+        <div class="field"><label>Contato (nome/telefone/e-mail)</label><input type="text" id="ld-contact"></div>
+        <div class="field"><label>Origem do lead</label><input type="text" id="ld-source" placeholder="Ex: indicação, evento, LinkedIn"></div>
+        <div class="field"><label>Cota pretendida</label><select id="ld-tier"><option>Ouro</option><option>Prata</option><option>Bronze</option><option>Outro</option></select></div>
+        <div class="field"><label>Valor solicitado (R$)</label><input type="number" id="ld-value" min="0" step="0.01"></div>
+        <div class="field"><label>Probabilidade de fechamento (%)</label><input type="number" id="ld-prob" min="0" max="100"></div>
+        <div class="field"><label>Próximo follow-up</label><input type="date" id="ld-followup"></div>
+        <div class="field full"><label>Observações</label><textarea id="ld-notes"></textarea></div>
+        <div class="field full"><button type="button" id="form-lead-submit" class="btn">Salvar lead</button></div>
+      </form>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>Todos os leads</h2></div>
+      <table class="data-table" id="leads-table"><thead><tr>
+        <th>Empresa</th><th>Segmento</th><th>Origem</th><th>Cota</th><th>Valor</th><th>Prob.</th><th>Follow-up</th><th></th>
+      </tr></thead><tbody id="leads-tbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- COTAS -->
+  <div class="page" id="page-cotas">
+    <div class="page-head">
+      <div><h1>Hierarquia de Cotas</h1><p>Edite os benefícios de cada cota — as alterações refletem em todo o sistema</p></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn ghost sm" id="btn-load-official">Carregar hierarquia oficial</button>
+        <button class="btn" id="btn-new-tier">+ Nova cota</button>
+      </div>
+    </div>
+    <div class="section glass" id="new-tier-form" style="display:none;">
+      <div class="section-head"><h2>Cadastrar cota</h2><button class="btn ghost sm" id="cancel-new-tier">Cancelar</button></div>
+      <form id="form-tier" class="form-grid">
+        <div class="field"><label>Nome da cota</label><input type="text" id="tf-name" placeholder="Ex: Diamante, Platina, Ouro"></div>
+        <div class="field"><label>Valor (R$)</label><input type="number" id="tf-value" min="0" step="0.01" placeholder="0,00"></div>
+        <div class="field"><label>Quantidade disponível</label><input type="number" id="tf-quantity" min="0" step="1" placeholder="Ex: 3"></div>
+        <div class="field full"><label>Benefícios</label><textarea id="tf-benefits" placeholder="- Um benefício por linha"></textarea></div>
+        <div class="field full"><button type="button" id="form-tier-submit" class="btn">Salvar cota</button></div>
+      </form>
+    </div>
+    <div class="glass" style="overflow:hidden; border-radius:14px;">
+      <table class="quota-table" id="tier-table">
+        <thead><tr>
+          <th>Cota</th><th>Valor</th><th>Vagas</th><th></th>
+        </tr></thead>
+        <tbody id="tier-tbody"></tbody>
+      </table>
+    </div>
+    <div id="tier-editors"></div>
+  </div>
+
+  <!-- VALUATION DE ATIVOS -->
+  <div class="page" id="page-valuation">
+    <div class="page-head"><div><h1>Valuation de Ativos</h1><p>Técnica de precificação de mercado pra justificar o valor de cada cota</p></div></div>
+
+    <div class="section glass">
+      <div class="section-head"><h2>Parâmetros base — Ativos Digitais</h2></div>
+      <div class="form-grid">
+        <div class="field"><label>Alcance orgânico acumulado</label><input type="number" id="val-alcance" min="0"></div>
+        <div class="field"><label>CPM de mercado — mínimo (R$)</label><input type="number" id="val-cpm-min" min="0" step="0.01"></div>
+        <div class="field"><label>CPM de mercado — máximo (R$)</label><input type="number" id="val-cpm-max" min="0" step="0.01"></div>
+        <div class="field"><label>Audiência qualificada (%)</label><input type="number" id="val-audiencia" min="0" step="0.01"></div>
+        <div class="field"><label>Valoração mensal de redes (R$, ciclo padrão)</label><input type="number" id="val-mensal" min="0" step="0.01"></div>
+      </div>
+    </div>
+
+    <div class="section glass">
+      <div class="section-head"><h2>Parâmetros base — Exposição Presencial (Branding)</h2></div>
+      <div class="form-grid">
+        <div class="field"><label>Fluxo de pessoas no evento</label><input type="number" id="val-fluxo" min="0"></div>
+        <div class="field"><label>CPM de impacto presencial (R$)</label><input type="number" id="val-cpm-presencial" min="0" step="0.01"></div>
+        <div class="field full"><label>Ativos físicos inclusos</label><textarea id="val-ativos-fisicos" placeholder="- Um item por linha"></textarea></div>
+      </div>
+    </div>
+
+    <div class="section glass">
+      <div class="section-head"><h2>Ativos de Relacionamento e Autoridade (R$ por temporada)</h2></div>
+      <div class="form-grid">
+        <div class="field"><label>Selo "Patrocinador Oficial"</label><input type="number" id="val-selo" min="0" step="0.01"></div>
+        <div class="field"><label>Menção em entrevista/mídia (por inserção)</label><input type="number" id="val-midia" min="0" step="0.01"></div>
+        <div class="field"><label>Logo no mascote</label><input type="number" id="val-mascote" min="0" step="0.01"></div>
+      </div>
+    </div>
+
+    <div class="section glass">
+      <div class="section-head">
+        <h2>Custo Direto de Produção — tabela de complexidade</h2>
+        <button class="btn sm" id="btn-new-prod">+ Item</button>
+      </div>
+      <table class="data-table" id="prod-table"><thead><tr><th>Tipo de peça</th><th>Complexidade</th><th>Valor</th><th></th></tr></thead><tbody id="prod-tbody"></tbody></table>
+      <div style="margin-top:14px; font-size:12px; color:var(--gray);">Até 2 alterações grátis por peça — adicionais somam 30% sobre o valor base. Custo médio de confecção física (R$): <input type="number" id="val-fisico" min="0" step="0.01" style="width:100px; margin-left:8px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:8px; color:var(--white); padding:4px 8px;"></div>
+    </div>
+
+    <div class="section glass">
+      <div class="section-head"><h2>Calculadora — Fórmula Global de Precificação</h2></div>
+      <div class="form-grid">
+        <div class="field"><label>Impressões da campanha</label><input type="number" id="calc-impressoes" min="0"></div>
+        <div class="field"><label>Visitantes do evento (exposição)</label><input type="number" id="calc-visitantes" min="0"></div>
+        <div class="field"><label>Custo de produção total (R$)</label><input type="number" id="calc-producao" min="0" step="0.01" value="0"></div>
+        <div class="field"><label>Markup sobre produção (x)</label><input type="number" id="calc-markup" min="1" step="0.1" value="1"></div>
+        <div class="field"><label>Fator de Afinidade (FA)</label>
+          <select id="calc-fa">
+            <option value="1.0">1.0 — Padrão (sem ligação direta)</option>
+            <option value="1.2">1.2 — Média (posicionamento institucional/jovem)</option>
+            <option value="1.35">1.35 — Alta (tecnologia/indústria/educação)</option>
+            <option value="1.5">1.5 — Alta + Selo de Campeã</option>
+          </select>
+        </div>
+        <div class="field"><label>Taxa Premium de Exclusividade (TPE)</label>
+          <select id="calc-tpe">
+            <option value="0">0% — Sem exclusividade</option>
+            <option value="0.2">20% — Setorial</option>
+            <option value="0.25">25% — Setorial</option>
+            <option value="0.3">30% — Setorial</option>
+            <option value="0.5">50% — Master (N/P in Seven / Diamante)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="btn-calc" style="margin-top:8px;">Calcular Valor Final</button>
+      <div id="calc-result" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+  <!-- TEAM PARTNERS DECLARATION -->
+  <div class="page" id="page-vitrine">
+    <div class="page-head"><div><h1>Team Partners Declaration</h1><p>Vitrine de credibilidade com todos os parceiros ativos, sem separar por categoria</p></div></div>
+    <div class="tier-grid" id="vitrine-grid"></div>
+  </div>
+
+  <!-- PARCEIROS -->
+  <div class="page" id="page-parceiros">
+    <div class="page-head">
+      <div><h1>Parceiros</h1><p>Patrocinador paga, Parceiro entrega em forma de serviço, Apoiador só apoia</p></div>
+      <div class="filters" id="parceiros-filters"></div>
+    </div>
+    <div class="card-grid" id="parceiros-grid"></div>
+  </div>
+
+  <!-- USP / UVP / OPORTUNIDADES -->
+  <div class="page" id="page-proposta">
+    <div class="page-head"><div><h1>USP / UVP / Oportunidades</h1><p>Proposta de valor da Seven Speed para patrocinadores</p></div></div>
+    <div class="section glass">
+      <div class="section-head"><h2>USP — o que nos torna diferentes</h2></div>
+      <textarea id="usp-text" style="width:100%; min-height:90px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:10px; color:var(--white); padding:12px; font-family:var(--font); font-size:13px;" placeholder="O que torna a Seven Speed diferente de outras equipes?"></textarea>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>UVP — valor específico para o patrocinador</h2></div>
+      <textarea id="uvp-text" style="width:100%; min-height:90px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:10px; color:var(--white); padding:12px; font-family:var(--font); font-size:13px;" placeholder="Qual valor específico um patrocinador recebe ao investir na Seven Speed?"></textarea>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>Oportunidades de parceria</h2><button class="btn sm" id="btn-new-opp">+ Oportunidade</button></div>
+      <div id="new-opp-form" style="display:none; margin-bottom:16px;">
+        <form id="form-opp" class="form-grid">
+          <div class="field full"><label>Nome da oportunidade</label><input type="text" id="opf-name"></div>
+          <div class="field full"><button type="button" id="form-opp-submit" class="btn sm">Salvar</button></div>
+        </form>
+      </div>
+      <div class="card-grid" id="opp-grid"></div>
+    </div>
+  </div>
+
+  <!-- 7 PILARES -->
+  <div class="page" id="page-pilares">
+    <div class="page-head">
+      <div><h1>7 Pilares de Patrocínio</h1><p>Fundamentos da filosofia de patrocínio da Seven Speed</p></div>
+      <button class="btn" id="btn-new-pillar">+ Pilar</button>
+    </div>
+    <div class="section glass" id="new-pillar-form" style="display:none;">
+      <div class="section-head"><h2>Novo pilar</h2><button class="btn ghost sm" id="cancel-new-pillar">Cancelar</button></div>
+      <form id="form-pillar" class="form-grid">
+        <div class="field full"><label>Nome do pilar</label><input type="text" id="pf-name" placeholder="Ex: Inovação, Sustentabilidade, Educação"></div>
+        <div class="field full"><button type="button" id="form-pillar-submit" class="btn">Salvar pilar</button></div>
+      </form>
+    </div>
+    <div class="section glass" style="text-align:center; padding:28px 16px 8px;">
+      <div id="pyramid-container" style="display:flex; justify-content:center;"></div>
+    </div>
+    <div class="card-grid" id="pillar-grid"></div>
+  </div>
+
+  <!-- SUBMARCAS -->
+  <div class="page" id="page-submarcas">
+    <div class="page-head">
+      <div><h1>Submarcas / Projetos Internos</h1><p>Área administrativa — não é apresentada como oferta ao patrocinador</p></div>
+      <button class="btn" id="btn-new-project">+ Projeto</button>
+    </div>
+    <div class="section glass" id="new-project-form" style="display:none;">
+      <div class="section-head"><h2>Novo projeto</h2><button class="btn ghost sm" id="cancel-new-project">Cancelar</button></div>
+      <form id="form-project" class="form-grid">
+        <div class="field full"><label>Nome do projeto/submarca</label><input type="text" id="prf-name"></div>
+        <div class="field"><label>Valor disponibilizado ao Instituto Seven (R$)</label><input type="number" id="prf-valor" min="0" step="0.01"></div>
+        <div class="field full"><button type="button" id="form-project-submit" class="btn">Salvar projeto</button></div>
+      </form>
+    </div>
+    <div class="card-grid" id="project-grid"></div>
+  </div>
+
+  <!-- BRAND ACTIVATION -->
+  <div class="page" id="page-ativacoes">
+    <div class="page-head">
+      <div><h1>Brand Activation</h1><p>Ativações de marca realizadas pela equipe</p></div>
+      <button class="btn" id="btn-new-activation">+ Ativação</button>
+    </div>
+    <div class="section glass" id="new-activation-form" style="display:none;">
+      <div class="section-head"><h2>Nova ativação</h2><button class="btn ghost sm" id="cancel-new-activation">Cancelar</button></div>
+      <form id="form-activation" class="form-grid">
+        <div class="field full"><label>Local / nome da ativação</label><input type="text" id="acf-local"></div>
+        <div class="field full"><label>O que foi a ativação</label><input type="text" id="acf-desc" placeholder="Ex: adesivo no carro, presença no evento X, story dedicado"></div>
+        <div class="field"><label>Patrocinador</label><select id="acf-sponsor"></select></div>
+        <div class="field full"><button type="button" id="form-activation-submit" class="btn">Salvar ativação</button></div>
+      </form>
+    </div>
+    <div class="card-grid" id="activation-grid"></div>
+  </div>
+
+  <!-- CASE STUDIES -->
+  <div class="page" id="page-cases">
+    <div class="page-head">
+      <div><h1>Case Studies</h1><p>Casos de sucesso documentados de patrocínio</p></div>
+      <button class="btn" id="btn-new-case">+ Case</button>
+    </div>
+    <div class="section glass" id="new-case-form" style="display:none;">
+      <div class="section-head"><h2>Novo case</h2><button class="btn ghost sm" id="cancel-new-case">Cancelar</button></div>
+      <form id="form-case" class="form-grid">
+        <div class="field full"><label>Patrocinador do case</label><input type="text" id="csf-sponsor"></div>
+        <div class="field full"><button type="button" id="form-case-submit" class="btn">Salvar case</button></div>
+      </form>
+    </div>
+    <div class="card-grid" id="case-grid"></div>
+  </div>
+
+  <!-- RETROALIMENTAÇÃO DO CICLO -->
+  <div class="page" id="page-ciclo">
+    <div class="page-head"><div><h1>Retroalimentação do Ciclo</h1><p>Resultados → Análise → Feedback → Ajustes → Nova estratégia</p></div></div>
+    <div class="kpis" id="ciclo-kpis"></div>
+    <div class="section glass">
+      <div class="section-head"><h2>Insights para o próximo ciclo</h2></div>
+      <textarea id="ciclo-notes" style="width:100%; min-height:140px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:10px; color:var(--white); padding:12px; font-family:var(--font); font-size:13px;" placeholder="O que funcionou, o que não funcionou, e o que muda na próxima temporada de captação..."></textarea>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>Retroalimentação por patrocinador</h2></div>
+      <div id="ciclo-sponsors"></div>
+    </div>
+  </div>
+
+  <!-- AIDA -->
+  <div class="page" id="page-aida">
+    <div class="page-head"><div><h1>AIDA</h1><p>Abordagem comercial — do primeiro contato ao fechamento</p></div></div>
+    <div class="tier-grid" style="margin-bottom:28px;">
+      <div class="tier-card glass">
+        <h3>Atenção</h3>
+        <div style="font-size:11px; color:var(--gray); margin-bottom:10px;">Como chamar a atenção do prospect</div>
+        <textarea id="aida-atencao" placeholder="Ex: abordagem inicial, ganchos usados..."></textarea>
+      </div>
+      <div class="tier-card glass">
+        <h3>Interesse</h3>
+        <div style="font-size:11px; color:var(--gray); margin-bottom:10px;">Apresentação da Seven Speed, dados e diferenciais</div>
+        <textarea id="aida-interesse" placeholder="Ex: pitch deck, dados de alcance, USP..."></textarea>
+      </div>
+      <div class="tier-card glass">
+        <h3>Desejo</h3>
+        <div style="font-size:11px; color:var(--gray); margin-bottom:10px;">Benefícios, UVP, resultados e cases</div>
+        <textarea id="aida-desejo" placeholder="Ex: cases de sucesso, UVP, resultados de ROI..."></textarea>
+      </div>
+      <div class="tier-card glass">
+        <h3>Ação</h3>
+        <div style="font-size:11px; color:var(--gray); margin-bottom:10px;">Proposta, negociação e fechamento</div>
+        <textarea id="aida-acao" placeholder="Ex: modelo de proposta, condições de fechamento..."></textarea>
+      </div>
+    </div>
+    <div class="section glass">
+      <div class="section-head"><h2>Estágio AIDA por prospect</h2></div>
+      <table class="data-table" id="aida-table"><thead><tr><th>Prospect</th><th>Origem</th><th>Estágio AIDA</th></tr></thead><tbody id="aida-tbody"></tbody></table>
+    </div>
+  </div>
+
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div id="overlay">
+  <div id="detail">
+    <div class="detail-head">
+      <div>
+        <h2 id="d-name">—</h2>
+        <p id="d-sub">—</p>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:8px;">
+        <button class="btn ghost sm" id="d-delete">Remover patrocinador</button>
+        <button class="close-btn" id="d-close">✕</button>
+      </div>
+    </div>
+    <div class="detail-tabs" id="d-tabs">
+      <button class="d-tab active" data-tab="overview">Visão Geral</button>
+      <button class="d-tab" data-tab="posts">Posts</button>
+      <button class="d-tab" data-tab="roi">ROI &amp; ROO</button>
+      <button class="d-tab" data-tab="compliance">Compliance</button>
+      <button class="d-tab" data-tab="feedback">Feedback &amp; Renovação</button>
+      <button class="d-tab" data-tab="debriefing">Debriefing</button>
+    </div>
+    <div class="detail-body">
+      <div class="d-panel active" id="panel-overview"></div>
+      <div class="d-panel" id="panel-posts"></div>
+      <div class="d-panel" id="panel-roi"></div>
+      <div class="d-panel" id="panel-compliance"></div>
+      <div class="d-panel" id="panel-feedback"></div>
+      <div class="d-panel" id="panel-debriefing"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'seven-speed-sponsorship-data';
+let data = { sponsors: [], leads: [], tiers: [] };
+let spFilter = 'Todos';
+let activeSponsorId = null;
+
+const DEFAULT_TIERS = [
+  { name:'Diamante', value:35000, quantity:1, benefits:'' },
+  { name:'Platina', value:25000, quantity:2, benefits:'' },
+  { name:'Esmeralda', value:15000, quantity:3, benefits:'' },
+  { name:'Ouro', value:5000, quantity:3, benefits:'' },
+  { name:'Prata', value:1500, quantity:2, benefits:'' },
+  { name:'Bronze', value:1000, quantity:2, benefits:'' },
+];
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmtBRL(n){ return (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtNum(n){ return (Number(n)||0).toLocaleString('pt-BR'); }
+function cls(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+async function storageGet(key){
+  try{
+    if(window.storage){ const r = await window.storage.get(key); if(r && r.value) return r.value; }
+  }catch(e){ console.warn('window.storage indisponível, tentando localStorage', e); }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  let ok = false;
+  try{ if(window.storage){ await window.storage.set(key, value); ok = true; } }catch(e){ console.warn('Falha ao salvar em window.storage', e); }
+  try{ localStorage.setItem(key, value); ok = true; }catch(e){ console.warn('Falha ao salvar em localStorage', e); }
+  return ok;
+}
+
+async function loadData(){
+  try{
+    const raw = await storageGet(STORAGE_KEY);
+    data = raw ? JSON.parse(raw) : { sponsors:[], leads:[], tiers:[] };
+  }catch(e){ data = { sponsors:[], leads:[], tiers:[] }; }
+  if(!data.tiers || !data.tiers.length) data.tiers = JSON.parse(JSON.stringify(DEFAULT_TIERS));
+  if(!data.sponsors) data.sponsors = [];
+  if(!data.leads) data.leads = [];
+  if(!data.opportunities) data.opportunities = ['Naming Rights','Branding no carro','Branding no uniforme','Redes sociais','Eventos','Ativações presenciais','Conteúdo digital','Projetos sociais','Networking','Ações educacionais','Experiências exclusivas'].map(name=>({name, desc:''}));
+  if(!data.pillars) data.pillars = [];
+  if(!data.projects) data.projects = [];
+  if(!data.activations) data.activations = [];
+  if(!data.cases) data.cases = [];
+  if(data.usp===undefined) data.usp = '';
+  if(data.uvp===undefined) data.uvp = '';
+  if(data.cycleNotes===undefined) data.cycleNotes = '';
+  if(!data.aida) data.aida = { atencao:'', interesse:'', desejo:'', acao:'' };
+  if(!data.valuation) data.valuation = {
+    alcance: 7267, cpmMin: 10, cpmMax: 30, cpmDefault: 20, audiencia: 4.48, mensal: 204.20,
+    fluxo: 30000, cpmPresencial: 60,
+    ativosFisicos: 'Logomarca na parte de trás do uniforme oficial (costas)\nLogomarca adesivada no Pit Display (estande)\nLogomarca no Carro Oficial da escuderia\nEspaço para vídeo comercial na tela do Pit',
+    selo: 500, midia: 1500, mascote: 1000,
+    fisico: 350,
+    producao: [
+      {tipo:'Story Simples', complexidade:'Baixa', valor:'R$ 20,00'},
+      {tipo:'Reels (Capa)', complexidade:'Baixa', valor:'R$ 20,00 - R$ 35,00'},
+      {tipo:'Feed Simples', complexidade:'Baixa', valor:'R$ 30,00 - R$ 50,00'},
+      {tipo:'Story Elaborado', complexidade:'Alta', valor:'R$ 40,00'},
+      {tipo:'Feed Personalizado', complexidade:'Média', valor:'R$ 60,00 - R$ 90,00'},
+      {tipo:'Flyer / Banner', complexidade:'Média', valor:'R$ 130,00 - R$ 150,00'},
+      {tipo:'Carrossel (até 5 páginas)', complexidade:'Média', valor:'R$ 150,00'},
+      {tipo:'Carrossel (até 10 páginas)', complexidade:'Alta', valor:'R$ 250,00'},
+      {tipo:'Arte Elaborada (Fotomanipulação)', complexidade:'Alta', valor:'R$ 200,00 - R$ 250,00'},
+    ]
+  };
+  renderAll();
+}
+async function saveData(){
+  const ok = await storageSet(STORAGE_KEY, JSON.stringify(data));
+  const statusEl = document.getElementById('save-status');
+  if(statusEl){
+    statusEl.textContent = ok ? 'salvo automaticamente' : 'não foi possível salvar — use "Exportar dados"';
+    statusEl.style.color = ok ? 'var(--green)' : 'var(--red)';
+  }
+  if(!ok) console.error('Não foi possível salvar os dados em nenhum armazenamento disponível.');
+}
+
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'seven-speed-captacao-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+document.getElementById('btn-import').addEventListener('click', ()=>{
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt)=>{
+    try{
+      const parsed = JSON.parse(evt.target.result);
+      data = parsed;
+      if(!data.tiers || !data.tiers.length) data.tiers = JSON.parse(JSON.stringify(DEFAULT_TIERS));
+      if(!data.opportunities) data.opportunities = [];
+      if(!data.pillars) data.pillars = [];
+      if(!data.projects) data.projects = [];
+      if(!data.activations) data.activations = [];
+      if(!data.cases) data.cases = [];
+      if(!data.aida) data.aida = { atencao:'', interesse:'', desejo:'', acao:'' };
+      if(data.usp===undefined) data.usp = '';
+      if(data.uvp===undefined) data.uvp = '';
+      if(data.cycleNotes===undefined) data.cycleNotes = '';
+      if(!data.valuation) data.valuation = {};
+      saveData();
+      renderAll();
+      const statusEl = document.getElementById('save-status');
+      if(statusEl){ statusEl.textContent = 'dados importados com sucesso'; statusEl.style.color = 'var(--green)'; }
+    }catch(err){
+      const statusEl = document.getElementById('save-status');
+      if(statusEl){ statusEl.textContent = 'arquivo inválido para importar'; statusEl.style.color = 'var(--red)'; }
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---------- NAV ----------
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+  });
+});
+
+// ---------- DASHBOARD ----------
+function renderDashboard(){
+  const s = data.sponsors;
+  const totalCaptado = s.filter(x=>['Ativo','Renovado'].includes(x.status)).reduce((a,x)=>a+(Number(x.invest)||0),0);
+  const emNegociacao = s.filter(x=>x.status==='Negociação').reduce((a,x)=>a+(Number(x.invest)||0),0);
+  const ativos = s.filter(x=>x.status==='Ativo'||x.status==='Renovado').length;
+  const totalPosts = s.reduce((a,x)=>a+((x.posts||[]).length),0);
+  const postsPrometidos = s.reduce((a,x)=>a+(Number(x.postsGoal)||0),0);
+  const alcanceTotal = s.reduce((a,x)=>a+((x.posts||[]).reduce((p,post)=>p+(Number(post.alcance)||0),0)),0);
+  const roiTotal = s.reduce((a,x)=>a+((x.roiEntries||[]).reduce((p,r)=>p+(Number(r.retorno)||0),0)),0);
+  const leadsTotal = data.leads.length;
+  const complianceAvg = s.length ? (s.reduce((a,x)=>a+sponsorCompliance(x),0)/s.length) : 0;
+
+  document.getElementById('dash-kpis').innerHTML = `
+    <div class="kpi glass"><div class="l">Total de patrocinadores</div><div class="v">${s.length}</div></div>
+    <div class="kpi glass"><div class="l">Patrocinadores ativos</div><div class="v green">${ativos}</div></div>
+    <div class="kpi glass"><div class="l">Em negociação</div><div class="v">${s.filter(x=>x.status==='Negociação').length}</div></div>
+    <div class="kpi glass"><div class="l">Valor total captado</div><div class="v red">${fmtBRL(totalCaptado)}</div></div>
+    <div class="kpi glass"><div class="l">Potencial em negociação</div><div class="v">${fmtBRL(emNegociacao)}</div></div>
+    <div class="kpi glass"><div class="l">Compliance médio</div><div class="v">${complianceAvg.toFixed(0)}%</div></div>
+    <div class="kpi glass"><div class="l">Posts publicados / previstos</div><div class="v">${totalPosts} / ${postsPrometidos}</div></div>
+    <div class="kpi glass"><div class="l">Alcance total</div><div class="v">${fmtNum(alcanceTotal)}</div></div>
+    <div class="kpi glass"><div class="l">ROI total entregue</div><div class="v green">${fmtBRL(roiTotal)}</div></div>
+    <div class="kpi glass"><div class="l">Leads gerados</div><div class="v">${leadsTotal}</div></div>
+    <div class="kpi glass"><div class="l">Entregas realizadas</div><div class="v">${totalPosts}</div></div>
+    <div class="kpi glass"><div class="l">Entregas previstas</div><div class="v">${postsPrometidos}</div></div>
+  `;
+
+  const statuses = ['Ativo','Negociação','Renovado','Perdido','Lead'];
+  const max = Math.max(1, ...statuses.map(st=>s.filter(x=>x.status===st).length));
+  document.getElementById('dash-status-dist').innerHTML = statuses.map(st=>{
+    const count = s.filter(x=>x.status===st).length;
+    return `<div class="dist-row"><div class="dist-label">${st}</div><div class="dist-bar"><div class="dist-fill" style="width:${count/max*100}%"></div></div><div class="dist-val">${count}</div></div>`;
+  }).join('');
+
+  const withRoi = s.map(x=>({name:x.name, roi:(x.roiEntries||[]).reduce((p,r)=>p+(Number(r.retorno)||0),0)}))
+    .sort((a,b)=>b.roi-a.roi).slice(0,5);
+  const maxRoi = Math.max(1, ...withRoi.map(x=>x.roi));
+  document.getElementById('dash-roi-top').innerHTML = withRoi.length ? withRoi.map(x=>
+    `<div class="dist-row"><div class="dist-label">${x.name}</div><div class="dist-bar"><div class="dist-fill" style="width:${x.roi/maxRoi*100}%"></div></div><div class="dist-val">${fmtBRL(x.roi)}</div></div>`
+  ).join('') : '<div class="empty-row">Nenhum ROI registrado ainda.</div>';
+}
+
+function sponsorCompliance(sp){
+  const items = sp.compliance || [];
+  if(!items.length) return 0;
+  const total = items.reduce((a,i)=>a+((Number(i.entregue)/Math.max(Number(i.prometido),1))*100),0);
+  return Math.min(total/items.length, 100);
+}
+
+// ---------- PATROCINADORES ----------
+document.getElementById('btn-new-sponsor').addEventListener('click', ()=>{
+  document.getElementById('new-sponsor-form').style.display='block';
+});
+document.getElementById('cancel-new-sponsor').addEventListener('click', ()=>{
+  document.getElementById('new-sponsor-form').style.display='none';
+});
+document.getElementById('sp-contrib-type').addEventListener('change', ()=>{
+  const val = document.getElementById('sp-contrib-type').value;
+  const relSel = document.getElementById('sp-relation');
+  if(val==='Dinheiro') relSel.value = 'Patrocinador';
+  else if(val==='Serviço' || val==='Produto' || val==='Misto') relSel.value = 'Parceiro';
+  else if(val==='Nenhuma') relSel.value = 'Apoiador';
+});
+document.getElementById('form-sponsor-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const nameVal = document.getElementById('sp-name').value.trim();
+  if(!nameVal){
+    const statusEl = document.getElementById('save-status');
+    if(statusEl){ statusEl.textContent = 'preencha o nome da empresa'; statusEl.style.color = 'var(--red)'; }
+    return;
+  }
+  const sp = {
+    id: uid(),
+    name: nameVal,
+    cat: document.getElementById('sp-cat').value.trim(),
+    tier: document.getElementById('sp-tier').value,
+    status: document.getElementById('sp-status').value,
+    relationType: document.getElementById('sp-relation').value,
+    contribType: document.getElementById('sp-contrib-type').value,
+    contribDesc: document.getElementById('sp-contrib-desc').value.trim(),
+    invest: parseFloat(document.getElementById('sp-invest').value)||0,
+    resp: document.getElementById('sp-resp').value.trim(),
+    start: document.getElementById('sp-start').value,
+    end: document.getElementById('sp-end').value,
+    postsGoal: parseInt(document.getElementById('sp-posts-goal').value)||0,
+    posts: [], roiEntries: [], compliance: [], feedback: null, pipelineStage: 'Fechado',
+    roo: []
+  };
+  if(!sp.name) return;
+  data.sponsors.push(sp);
+  saveData();
+  document.getElementById('form-sponsor').reset();
+  document.getElementById('new-sponsor-form').style.display='none';
+  renderAll();
+});
+
+function renderSponsorFilters(){
+  const statuses = ['Todos','Ativo','Negociação','Renovado','Perdido','Lead'];
+  document.getElementById('sp-filters').innerHTML = statuses.map(s=>
+    `<button class="chip ${spFilter===s?'active':''}" data-f="${s}">${s}</button>`).join('');
+  document.querySelectorAll('#sp-filters .chip').forEach(el=>{
+    el.addEventListener('click', ()=>{ spFilter = el.dataset.f; renderSponsorGrid(); });
+  });
+}
+
+function renderSponsorGrid(){
+  const list = spFilter==='Todos' ? data.sponsors : data.sponsors.filter(s=>s.status===spFilter);
+  const grid = document.getElementById('sp-grid');
+  if(!list.length){ grid.innerHTML = '<div class="empty-state">Nenhum patrocinador cadastrado ainda.</div>'; return; }
+  grid.innerHTML = list.map(sp=>{
+    const compliance = sponsorCompliance(sp);
+    const alcance = (sp.posts||[]).reduce((a,p)=>a+(Number(p.alcance)||0),0);
+    const roi = (sp.roiEntries||[]).reduce((a,r)=>a+(Number(r.retorno)||0),0);
+    return `
+    <div class="s-card glass" data-id="${sp.id}">
+      <div class="s-top">
+        <div><div class="s-name">${sp.name}</div><div class="s-cat">${sp.cat||'—'} · <span style="color:var(--red); font-weight:600;">${sp.relationType||'Patrocinador'}</span></div></div>
+        <div style="display:flex; align-items:flex-start; gap:6px;">
+          <span class="tier ${cls(sp.tier)}">${sp.tier}</span>
+          <button class="btn ghost sm" data-del-sponsor="${sp.id}" title="Remover patrocinador" style="padding:3px 8px;">✕</button>
+        </div>
+      </div>
+      <div class="progress-label"><span>Entregas</span><span>${(sp.posts||[]).length}/${sp.postsGoal||0}</span></div>
+      <div class="progress"><div class="progress-fill" style="width:${Math.min(((sp.posts||[]).length/Math.max(sp.postsGoal,1))*100,100)}%"></div></div>
+      <div class="s-metrics">
+        <div class="s-metric"><div class="m-l">${sp.contribType && sp.contribType!=='Dinheiro' ? 'Valor est.' : 'Investido'}</div><div class="m-v">${fmtBRL(sp.invest)}</div></div>
+        <div class="s-metric"><div class="m-l">Alcance</div><div class="m-v">${fmtNum(alcance)}</div></div>
+        <div class="s-metric"><div class="m-l">Compliance</div><div class="m-v">${compliance.toFixed(0)}%</div></div>
+      </div>
+      ${sp.contribType && sp.contribType!=='Dinheiro' ? `<div style="font-size:10.5px; color:var(--gray); margin-bottom:10px;">${sp.contribType}${sp.contribDesc ? ': '+sp.contribDesc : ''}</div>` : ''}
+      <div class="status-row"><span class="status ${cls(sp.status)}">${sp.status}</span><span style="font-size:11px;color:var(--gray)">ROI: ${fmtBRL(roi)}</span></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.s-card').forEach(el=>{
+    el.addEventListener('click', ()=> openDetail(el.dataset.id));
+  });
+  document.querySelectorAll('[data-del-sponsor]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(btn.dataset.armed==='1'){
+        data.sponsors = data.sponsors.filter(s=>s.id !== btn.dataset.delSponsor);
+        saveData();
+        renderAll();
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = '?';
+        btn.title = 'Clique de novo pra confirmar';
+        setTimeout(()=>{ if(btn.dataset.armed==='1'){ btn.dataset.armed='0'; btn.textContent='✕'; } }, 3000);
+      }
+    });
+  });
+}
+
+// ---------- DETAIL PANEL ----------
+document.getElementById('d-close').addEventListener('click', ()=> document.getElementById('overlay').classList.remove('open'));
+document.getElementById('d-delete').addEventListener('click', ()=>{
+  const btn = document.getElementById('d-delete');
+  if(btn.dataset.armed==='1'){
+    data.sponsors = data.sponsors.filter(s=>s.id !== activeSponsorId);
+    saveData();
+    document.getElementById('overlay').classList.remove('open');
+    renderAll();
+  } else {
+    btn.dataset.armed = '1';
+    btn.textContent = 'Confirmar remoção?';
+    btn.style.color = 'var(--red)';
+    setTimeout(()=>{ btn.dataset.armed='0'; btn.textContent='Remover patrocinador'; btn.style.color=''; }, 3000);
+  }
+});
+document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') document.getElementById('overlay').classList.remove('open'); });
+document.querySelectorAll('.d-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.d-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.d-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+function getSponsor(id){ return data.sponsors.find(s=>s.id===id); }
+
+function openDetail(id){
+  activeSponsorId = id;
+  const sp = getSponsor(id);
+  if(!sp) return;
+  document.getElementById('d-name').textContent = sp.name;
+  document.getElementById('d-sub').textContent = `${sp.tier} · ${sp.status} · ${sp.cat||'sem categoria'}`;
+  document.querySelectorAll('.d-tab')[0].click();
+  renderOverview(sp); renderPosts(sp); renderRoi(sp); renderCompliance(sp); renderFeedback(sp); renderDebriefing(sp);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function renderOverview(sp){
+  const alcance = (sp.posts||[]).reduce((a,p)=>a+(Number(p.alcance)||0),0);
+  const roi = (sp.roiEntries||[]).reduce((a,r)=>a+(Number(r.retorno)||0),0);
+  document.getElementById('panel-overview').innerHTML = `
+    <div class="mini-kpis">
+      <div class="mini-kpi"><div class="l">${sp.contribType && sp.contribType!=='Dinheiro' ? 'Valor estimado' : 'Investido'}</div><div class="v">${fmtBRL(sp.invest)}</div></div>
+      <div class="mini-kpi"><div class="l">Retorno (ROI)</div><div class="v">${fmtBRL(roi)}</div></div>
+      <div class="mini-kpi"><div class="l">Compliance</div><div class="v">${sponsorCompliance(sp).toFixed(0)}%</div></div>
+      <div class="mini-kpi"><div class="l">Alcance</div><div class="v">${fmtNum(alcance)}</div></div>
+    </div>
+    <table class="data-table">
+      <tr><td style="color:var(--gray)">Tipo de relação</td><td>${sp.relationType||'Patrocinador'}</td></tr>
+      <tr><td style="color:var(--gray)">Tipo de contribuição</td><td>${sp.contribType||'Dinheiro'}${sp.contribDesc ? ' — '+sp.contribDesc : ''}</td></tr>
+      <tr><td style="color:var(--gray)">Responsável Seven Speed</td><td>${sp.resp||'—'}</td></tr>
+      <tr><td style="color:var(--gray)">Início da parceria</td><td>${sp.start||'—'}</td></tr>
+      <tr><td style="color:var(--gray)">Vencimento / renovação</td><td>${sp.end||'—'}</td></tr>
+      <tr><td style="color:var(--gray)">Posts previstos</td><td>${sp.postsGoal||0}</td></tr>
+    </table>
+  `;
+}
+
+function renderPosts(sp){
+  const rows = (sp.posts||[]).map((p,i)=>`
+    <tr>
+      <td>${p.data||'—'}</td><td>${p.plataforma||'—'}</td><td>${p.tipo||'—'}</td>
+      <td class="num">${fmtNum(p.alcance)}</td><td class="num">${fmtNum(p.engajamento)}</td><td class="num">${fmtNum(p.leads)}</td>
+      <td><button class="btn ghost sm" data-del-post="${i}">excluir</button></td>
+    </tr>`).join('');
+  document.getElementById('panel-posts').innerHTML = `
+    <div style="margin-bottom:14px; font-size:12.5px; color:var(--gray)">${(sp.posts||[]).length} / ${sp.postsGoal||0} entregas realizadas</div>
+    <form id="form-post" class="form-grid" style="margin-bottom:18px;">
+      <div class="field"><label>Data</label><input type="date" id="pf-data"></div>
+      <div class="field"><label>Plataforma</label><input type="text" id="pf-plat" placeholder="Instagram, TikTok..."></div>
+      <div class="field"><label>Tipo</label><input type="text" id="pf-tipo" placeholder="Post, Story, Reel"></div>
+      <div class="field"><label>Alcance</label><input type="number" id="pf-alcance" min="0"></div>
+      <div class="field"><label>Engajamento</label><input type="number" id="pf-engaj" min="0"></div>
+      <div class="field"><label>Leads gerados</label><input type="number" id="pf-leads" min="0"></div>
+      <div class="field full"><button type="button" id="form-post-submit" class="btn sm">Registrar entrega</button></div>
+    </form>
+    <table class="data-table">
+      <thead><tr><th>Data</th><th>Plataforma</th><th>Tipo</th><th>Alcance</th><th>Engaj.</th><th>Leads</th><th></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" class="empty-row">Nenhuma entrega registrada ainda.</td></tr>'}</tbody>
+    </table>
+  `;
+  document.getElementById('form-post-submit').addEventListener('click', (e)=>{
+    e.preventDefault();
+    sp.posts = sp.posts || [];
+    sp.posts.push({
+      data: document.getElementById('pf-data').value,
+      plataforma: document.getElementById('pf-plat').value,
+      tipo: document.getElementById('pf-tipo').value,
+      alcance: parseInt(document.getElementById('pf-alcance').value)||0,
+      engajamento: parseInt(document.getElementById('pf-engaj').value)||0,
+      leads: parseInt(document.getElementById('pf-leads').value)||0,
+    });
+    saveData(); renderPosts(sp); renderAll();
+  });
+  document.querySelectorAll('[data-del-post]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ sp.posts.splice(parseInt(btn.dataset.delPost),1); saveData(); renderPosts(sp); renderAll(); });
+  });
+}
+
+function renderRoi(sp){
+  const rows = (sp.roiEntries||[]).map((r,i)=>`
+    <tr><td>${r.descricao||'—'}</td><td class="num">${fmtBRL(r.retorno)}</td><td><button class="btn ghost sm" data-del-roi="${i}">excluir</button></td></tr>
+  `).join('');
+  const rooRows = (sp.roo||[]).map((r,i)=>`
+    <tr><td>${r.objetivo||'—'}</td><td>${r.meta||'—'}</td><td>${r.resultado||'—'}</td><td><button class="btn ghost sm" data-del-roo="${i}">excluir</button></td></tr>
+  `).join('');
+  document.getElementById('panel-roi').innerHTML = `
+    <h3 style="font-size:13px; margin-bottom:10px;">ROI — Retorno mensurável</h3>
+    <form id="form-roi" class="form-grid" style="margin-bottom:16px;">
+      <div class="field full"><label>Descrição do retorno</label><input type="text" id="rf-desc" placeholder="Ex: ativação no evento X"></div>
+      <div class="field"><label>Valor de retorno (R$)</label><input type="number" id="rf-valor" min="0" step="0.01"></div>
+      <div class="field"><button type="button" id="form-roi-submit" class="btn sm" style="margin-top:22px;">Adicionar</button></div>
+    </form>
+    <table class="data-table"><thead><tr><th>Descrição</th><th>Retorno</th><th></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="3" class="empty-row">Nenhum ROI registrado. Não invente valores — cadastre apenas o que a equipe já calculou.</td></tr>'}</tbody></table>
+
+    <h3 style="font-size:13px; margin:24px 0 10px;">ROO — Objetivos estratégicos</h3>
+    <form id="form-roo" class="form-grid" style="margin-bottom:16px;">
+      <div class="field"><label>Objetivo estratégico</label><input type="text" id="rof-obj"></div>
+      <div class="field"><label>Meta</label><input type="text" id="rof-meta"></div>
+      <div class="field"><label>Resultado</label><input type="text" id="rof-res"></div>
+      <div class="field full"><button type="button" id="form-roo-submit" class="btn sm">Adicionar</button></div>
+    </form>
+    <table class="data-table"><thead><tr><th>Objetivo</th><th>Meta</th><th>Resultado</th><th></th></tr></thead>
+      <tbody>${rooRows || '<tr><td colspan="4" class="empty-row">Nenhum objetivo estratégico registrado ainda.</td></tr>'}</tbody></table>
+  `;
+  document.getElementById('form-roi-submit').addEventListener('click',(e)=>{
+    e.preventDefault();
+    sp.roiEntries = sp.roiEntries||[];
+    sp.roiEntries.push({ descricao: document.getElementById('rf-desc').value, retorno: parseFloat(document.getElementById('rf-valor').value)||0 });
+    saveData(); renderRoi(sp); renderAll();
+  });
+  document.querySelectorAll('[data-del-roi]').forEach(btn=>btn.addEventListener('click',()=>{
+    sp.roiEntries.splice(parseInt(btn.dataset.delRoi),1); saveData(); renderRoi(sp); renderAll();
+  }));
+  document.getElementById('form-roo-submit').addEventListener('click',(e)=>{
+    e.preventDefault();
+    sp.roo = sp.roo||[];
+    sp.roo.push({ objetivo: document.getElementById('rof-obj').value, meta: document.getElementById('rof-meta').value, resultado: document.getElementById('rof-res').value });
+    saveData(); renderRoi(sp);
+  });
+  document.querySelectorAll('[data-del-roo]').forEach(btn=>btn.addEventListener('click',()=>{
+    sp.roo.splice(parseInt(btn.dataset.delRoo),1); saveData(); renderRoi(sp);
+  }));
+}
+
+function renderCompliance(sp){
+  const rows = (sp.compliance||[]).map((c,i)=>{
+    const pct = Math.min((Number(c.entregue)/Math.max(Number(c.prometido),1))*100,100);
+    const color = pct>=90?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+    return `<div class="comp-row">
+      <div class="comp-name">${c.beneficio}</div>
+      <div class="comp-bar"><div class="comp-fill" style="width:${pct}%; background:${color}"></div></div>
+      <div class="comp-pct">${c.entregue}/${c.prometido} (${pct.toFixed(0)}%)</div>
+      <button class="btn ghost sm" data-del-comp="${i}">✕</button>
+    </div>`;
+  }).join('');
+  document.getElementById('panel-compliance').innerHTML = `
+    <div style="margin-bottom:16px; font-size:13px;">Compliance geral: <strong>${sponsorCompliance(sp).toFixed(0)}%</strong></div>
+    <form id="form-comp" class="form-grid" style="margin-bottom:18px;">
+      <div class="field"><label>Benefício</label><input type="text" id="cf-nome" placeholder="Ex: Posts no Instagram"></div>
+      <div class="field"><label>Prometido</label><input type="number" id="cf-prom" min="1"></div>
+      <div class="field"><label>Entregue</label><input type="number" id="cf-entr" min="0"></div>
+      <div class="field"><button type="button" id="form-comp-submit" class="btn sm" style="margin-top:22px;">Adicionar</button></div>
+    </form>
+    ${rows || '<div class="empty-row">Nenhum item de compliance cadastrado ainda.</div>'}
+  `;
+  document.getElementById('form-comp-submit').addEventListener('click',(e)=>{
+    e.preventDefault();
+    sp.compliance = sp.compliance||[];
+    sp.compliance.push({ beneficio: document.getElementById('cf-nome').value, prometido: parseInt(document.getElementById('cf-prom').value)||1, entregue: parseInt(document.getElementById('cf-entr').value)||0 });
+    saveData(); renderCompliance(sp); renderAll();
+  });
+  document.querySelectorAll('[data-del-comp]').forEach(btn=>btn.addEventListener('click',()=>{
+    sp.compliance.splice(parseInt(btn.dataset.delComp),1); saveData(); renderCompliance(sp); renderAll();
+  }));
+}
+
+function renderFeedback(sp){
+  const f = sp.feedback || {};
+  document.getElementById('panel-feedback').innerHTML = `
+    <h3 style="font-size:13px; margin-bottom:10px;">Feedback do patrocinador</h3>
+    <form id="form-fb" class="form-grid" style="margin-bottom:20px;">
+      <div class="field"><label>Satisfação geral (0-10)</label><input type="number" min="0" max="10" id="fb-sat" value="${f.sat||''}"></div>
+      <div class="field"><label>Qualidade das entregas (0-10)</label><input type="number" min="0" max="10" id="fb-qual" value="${f.qual||''}"></div>
+      <div class="field"><label>Comunicação (0-10)</label><input type="number" min="0" max="10" id="fb-com" value="${f.com||''}"></div>
+      <div class="field"><label>Prob. de recomendar (0-10)</label><input type="number" min="0" max="10" id="fb-rec" value="${f.rec||''}"></div>
+      <div class="field"><label>Prob. de renovar (0-10)</label><input type="number" min="0" max="10" id="fb-ren" value="${f.ren||''}"></div>
+      <div class="field full"><label>Comentários</label><textarea id="fb-coment">${f.coment||''}</textarea></div>
+      <div class="field full"><button type="button" id="form-fb-submit" class="btn sm">Salvar feedback</button></div>
+    </form>
+    <div id="fb-nps" style="margin-bottom:24px;"></div>
+
+    <h3 style="font-size:13px; margin-bottom:10px;">Renovação</h3>
+    <form id="form-renov" class="form-grid">
+      <div class="field"><label>Valor proposto (R$)</label><input type="number" id="rn-valor" min="0" step="0.01" value="${sp.renewalProposed||''}"></div>
+      <div class="field"><label>Probabilidade de renovação (%)</label><input type="number" id="rn-prob" min="0" max="100" value="${sp.renewalProb||''}"></div>
+      <div class="field"><label>Status</label>
+        <select id="rn-status">
+          ${['Em análise','Proposta enviada','Negociando','Renovado','Não renovou'].map(s=>`<option ${sp.renewalStatus===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field full"><button type="button" id="form-renov-submit" class="btn sm">Salvar renovação</button></div>
+    </form>
+  `;
+  const npsBox = document.getElementById('fb-nps');
+  if(f.rec !== undefined && f.rec !== ''){
+    const nps = Math.round((Number(f.rec)-5)*20);
+    npsBox.innerHTML = `<div class="mini-kpi" style="display:inline-block;"><div class="l">NPS calculado</div><div class="v">${nps}</div></div>`;
+  } else {
+    npsBox.innerHTML = '';
+  }
+  document.getElementById('form-fb-submit').addEventListener('click',(e)=>{
+    e.preventDefault();
+    sp.feedback = {
+      sat: document.getElementById('fb-sat').value, qual: document.getElementById('fb-qual').value,
+      com: document.getElementById('fb-com').value, rec: document.getElementById('fb-rec').value,
+      ren: document.getElementById('fb-ren').value, coment: document.getElementById('fb-coment').value,
+    };
+    saveData(); renderFeedback(sp);
+  });
+  document.getElementById('form-renov-submit').addEventListener('click',(e)=>{
+    e.preventDefault();
+    sp.renewalProposed = parseFloat(document.getElementById('rn-valor').value)||0;
+    sp.renewalProb = parseInt(document.getElementById('rn-prob').value)||0;
+    sp.renewalStatus = document.getElementById('rn-status').value;
+    if(sp.renewalStatus==='Renovado') sp.status='Renovado';
+    saveData(); renderFeedback(sp); renderAll();
+  });
+}
+
+function renderDebriefing(sp){
+  const alcance = (sp.posts||[]).reduce((a,p)=>a+(Number(p.alcance)||0),0);
+  const engaj = (sp.posts||[]).reduce((a,p)=>a+(Number(p.engajamento)||0),0);
+  const roi = (sp.roiEntries||[]).reduce((a,r)=>a+(Number(r.retorno)||0),0);
+  document.getElementById('panel-debriefing').innerHTML = `
+    <div style="background:var(--glass-strong); border-radius:12px; padding:20px; font-size:13px; line-height:1.9;">
+      <strong style="font-size:15px;">Relatório de Debriefing — ${sp.name}</strong><br><br>
+      <strong>Resumo da parceria:</strong> cota ${sp.tier}, status ${sp.status}, responsável ${sp.resp||'—'}.<br>
+      <strong>Investimento:</strong> ${fmtBRL(sp.invest)}<br>
+      <strong>Entregas:</strong> ${(sp.posts||[]).length} de ${sp.postsGoal||0} previstas<br>
+      <strong>Compliance:</strong> ${sponsorCompliance(sp).toFixed(0)}%<br>
+      <strong>Alcance total:</strong> ${fmtNum(alcance)} · <strong>Engajamento:</strong> ${fmtNum(engaj)}<br>
+      <strong>ROI entregue:</strong> ${fmtBRL(roi)}<br>
+      <strong>Objetivos estratégicos (ROO):</strong> ${(sp.roo||[]).length ? (sp.roo.map(r=>r.objetivo).join(', ')) : 'nenhum registrado'}<br>
+      <strong>NPS:</strong> ${sp.feedback && sp.feedback.rec!=='' && sp.feedback.rec!==undefined ? Math.round((Number(sp.feedback.rec)-5)*20) : '—'}<br>
+      <strong>Status de renovação:</strong> ${sp.renewalStatus||'não iniciado'}
+    </div>
+    <button class="btn sm" style="margin-top:16px;" onclick="window.print()">Imprimir / exportar</button>
+  `;
+}
+
+// ---------- PIPELINE (Kanban) ----------
+const PIPELINE_STAGES = ['Lead','Primeiro Contato','Apresentação','Proposta Enviada','Negociação','Aguardando Retorno','Fechado','Perdido'];
+function renderKanban(){
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = PIPELINE_STAGES.map(stage=>{
+    const items = data.sponsors.filter(s=> (s.pipelineStage||'Lead') === stage && stage!=='Fechado' || (stage==='Fechado' && s.pipelineStage==='Fechado'));
+    const cards = data.sponsors.filter(s => (s.pipelineStage||'Negociação') === stage).map(s=>`
+      <div class="kcard glass">
+        <div class="kname">${s.name}</div>
+        <div class="kmeta">${s.tier} · ${fmtBRL(s.invest)}</div>
+        <select data-id="${s.id}" class="stage-select">
+          ${PIPELINE_STAGES.map(st=>`<option ${st===stage?'selected':''}>${st}</option>`).join('')}
+        </select>
+      </div>`).join('');
+    return `<div class="kcol"><div class="kcol-head"><span>${stage}</span><span>${data.sponsors.filter(s=>(s.pipelineStage||'Negociação')===stage).length}</span></div>${cards}</div>`;
+  }).join('');
+  document.querySelectorAll('.stage-select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const sp = getSponsor(sel.dataset.id);
+      sp.pipelineStage = sel.value;
+      if(sel.value==='Fechado' && sp.status==='Lead') sp.status='Ativo';
+      if(sel.value==='Perdido') sp.status='Perdido';
+      saveData(); renderKanban(); renderAll();
+    });
+  });
+}
+
+// ---------- LEADS ----------
+document.getElementById('btn-new-lead').addEventListener('click', ()=> document.getElementById('new-lead-form').style.display='block');
+document.getElementById('cancel-new-lead').addEventListener('click', ()=> document.getElementById('new-lead-form').style.display='none');
+document.getElementById('form-lead-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  data.leads.push({
+    id: uid(),
+    name: document.getElementById('ld-name').value.trim(),
+    segment: document.getElementById('ld-segment').value.trim(),
+    contact: document.getElementById('ld-contact').value.trim(),
+    source: document.getElementById('ld-source').value.trim(),
+    tier: document.getElementById('ld-tier').value,
+    value: parseFloat(document.getElementById('ld-value').value)||0,
+    prob: parseInt(document.getElementById('ld-prob').value)||0,
+    followup: document.getElementById('ld-followup').value,
+    notes: document.getElementById('ld-notes').value.trim(),
+  });
+  saveData();
+  document.getElementById('form-lead').reset();
+  document.getElementById('new-lead-form').style.display='none';
+  renderLeads(); renderDashboard();
+});
+
+function renderLeads(){
+  const tbody = document.getElementById('leads-tbody');
+  if(!data.leads.length){ tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Nenhum lead cadastrado ainda.</td></tr>'; return; }
+  tbody.innerHTML = data.leads.map((l,i)=>`
+    <tr>
+      <td>${l.name}</td><td>${l.segment||'—'}</td><td>${l.source||'—'}</td><td>${l.tier}</td>
+      <td class="num">${fmtBRL(l.value)}</td><td class="num">${l.prob}%</td><td>${l.followup||'—'}</td>
+      <td><button class="btn ghost sm" data-conv="${i}">virar patrocinador</button> <button class="btn ghost sm" data-dell="${i}">excluir</button></td>
+    </tr>`).join('');
+  document.querySelectorAll('[data-dell]').forEach(btn=>btn.addEventListener('click',()=>{
+    data.leads.splice(parseInt(btn.dataset.dell),1); saveData(); renderLeads(); renderDashboard();
+  }));
+  document.querySelectorAll('[data-conv]').forEach(btn=>btn.addEventListener('click',()=>{
+    const l = data.leads[parseInt(btn.dataset.conv)];
+    data.sponsors.push({ id: uid(), name:l.name, cat:l.segment, tier:l.tier, status:'Negociação', invest:l.value, resp:'', start:'', end:'', postsGoal:0, posts:[], roiEntries:[], compliance:[], feedback:null, pipelineStage:'Primeiro Contato', roo:[] });
+    data.leads.splice(parseInt(btn.dataset.conv),1);
+    saveData(); renderAll();
+  }));
+}
+
+// ---------- COTAS ----------
+function tierOccupancy(tierName){
+  const occupied = data.sponsors.filter(s => s.tier===tierName && ['Ativo','Renovado'].includes(s.status)).length;
+  const negociando = data.sponsors.filter(s => s.tier===tierName && s.status==='Negociação').length;
+  return { occupied, negociando };
+}
+let openTierEditor = null;
+function renderTiers(){
+  const tbody = document.getElementById('tier-tbody');
+  tbody.innerHTML = data.tiers.map((t,i)=>{
+    const qty = Number(t.quantity)||0;
+    const { occupied, negociando } = tierOccupancy(t.name);
+    const remaining = qty - occupied;
+    let badge = '', badgeColor = 'var(--green)', badgeBg = 'rgba(31,157,92,0.12)';
+    if(qty <= 0){
+      badge = `${occupied} ocupada(s)`;
+      badgeColor = 'var(--gray)'; badgeBg = 'var(--glass-strong)';
+    } else if(remaining <= 0){
+      badge = remaining < 0 ? `Excedido ${occupied}/${qty}` : `Esgotado ${occupied}/${qty}`;
+      badgeColor = 'var(--red)'; badgeBg = 'rgba(217,4,41,0.12)';
+    } else if(remaining <= 1){
+      badge = `Última vaga · ${occupied}/${qty}`;
+      badgeColor = 'var(--amber)'; badgeBg = 'rgba(200,121,15,0.12)';
+    } else {
+      badge = `${occupied}/${qty} ocupadas`;
+    }
+    return `
+    <tr>
+      <td class="quota-name">${t.name}</td>
+      <td class="quota-value">${fmtBRL(t.value)}</td>
+      <td>
+        <div class="quota-qty-row">
+          <span class="quota-badge" style="background:${badgeBg}; color:${badgeColor};">${badge}</span>
+          ${negociando>0 ? `<span style="font-size:10.5px; color:var(--amber);">+${negociando} negociando</span>` : ''}
+        </div>
+      </td>
+      <td><button class="quota-edit-btn" data-tier-edit="${i}">${openTierEditor===i ? 'Fechar' : 'Editar'}</button></td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('[data-tier-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = parseInt(btn.dataset.tierEdit);
+      openTierEditor = openTierEditor===idx ? null : idx;
+      renderTiers();
+    });
+  });
+
+  const editorContainer = document.getElementById('tier-editors');
+  if(openTierEditor===null || !data.tiers[openTierEditor]){ editorContainer.innerHTML = ''; return; }
+  const t = data.tiers[openTierEditor];
+  const i = openTierEditor;
+  editorContainer.innerHTML = `
+    <div class="section glass quota-editor">
+      <div class="section-head"><h2>Editar cota — ${t.name}</h2><button class="btn ghost sm" data-tier-del="${i}">Excluir cota</button></div>
+      <div class="form-grid">
+        <div class="field"><label>Nome da cota</label><input type="text" data-tier-name="${i}" value="${t.name}"></div>
+        <div class="field"><label>Valor (R$)</label><input type="number" data-tier-value="${i}" value="${t.value}" min="0" step="0.01"></div>
+        <div class="field"><label>Quantidade de vagas</label><input type="number" data-tier-quantity="${i}" value="${Number(t.quantity)||0}" min="0" step="1"></div>
+        <div class="field full"><label>Benefícios</label><textarea data-tier-benefits="${i}" style="min-height:100px;">${t.benefits||''}</textarea></div>
+      </div>
+    </div>`;
+  document.querySelector('[data-tier-name]').addEventListener('blur', (e)=>{ data.tiers[i].name = e.target.value; saveData(); renderSponsorGrid(); renderTiers(); });
+  document.querySelector('[data-tier-value]').addEventListener('blur', (e)=>{ data.tiers[i].value = parseFloat(e.target.value)||0; saveData(); renderTiers(); });
+  document.querySelector('[data-tier-quantity]').addEventListener('blur', (e)=>{ data.tiers[i].quantity = parseInt(e.target.value)||0; saveData(); renderTiers(); });
+  document.querySelector('[data-tier-benefits]').addEventListener('blur', (e)=>{ data.tiers[i].benefits = e.target.value; saveData(); });
+  document.querySelector('[data-tier-del]').addEventListener('click', ()=>{
+    data.tiers.splice(i,1);
+    openTierEditor = null;
+    saveData(); renderTiers();
+  });
+}
+
+document.getElementById('btn-load-official').addEventListener('click', ()=>{
+  const btn = document.getElementById('btn-load-official');
+  if(btn.dataset.armed==='1'){
+    data.tiers = JSON.parse(JSON.stringify(DEFAULT_TIERS));
+    saveData(); renderAll();
+    btn.dataset.armed='0'; btn.textContent='Carregar hierarquia oficial';
+  } else {
+    btn.dataset.armed='1';
+    btn.textContent='Isso substitui as cotas atuais — confirmar?';
+    btn.style.color = 'var(--red)';
+    setTimeout(()=>{ if(btn.dataset.armed==='1'){ btn.dataset.armed='0'; btn.textContent='Carregar hierarquia oficial'; btn.style.color=''; } }, 4000);
+  }
+});
+document.getElementById('btn-new-tier').addEventListener('click', ()=> document.getElementById('new-tier-form').style.display='block');
+document.getElementById('cancel-new-tier').addEventListener('click', ()=> document.getElementById('new-tier-form').style.display='none');
+document.getElementById('form-tier-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('tf-name').value.trim();
+  if(!name) return;
+  data.tiers.push({
+    name,
+    value: parseFloat(document.getElementById('tf-value').value)||0,
+    quantity: parseInt(document.getElementById('tf-quantity').value)||0,
+    benefits: document.getElementById('tf-benefits').value.trim(),
+  });
+  saveData();
+  document.getElementById('form-tier').reset();
+  document.getElementById('new-tier-form').style.display='none';
+  renderTiers();
+});
+
+function populateTierSelects(){
+  const options = data.tiers.map(t=>`<option value="${t.name}">${t.name}</option>`).join('') + '<option value="Outro">Outro</option>';
+  const spSel = document.getElementById('sp-tier');
+  const ldSel = document.getElementById('ld-tier');
+  if(spSel) spSel.innerHTML = options;
+  if(ldSel) ldSel.innerHTML = options;
+  const acSel = document.getElementById('acf-sponsor');
+  if(acSel) acSel.innerHTML = '<option value="">— nenhum / geral —</option>' + data.sponsors.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function renderAll(){
+  populateTierSelects();
+  renderDashboard();
+  renderSponsorFilters();
+  renderSponsorGrid();
+  renderKanban();
+  renderLeads();
+  renderTiers();
+  renderVitrine();
+  renderParceiros();
+  renderProposta();
+  renderPillars();
+  renderPyramid();
+  renderProjects();
+  renderActivations();
+  renderCases();
+  renderCiclo();
+  renderAida();
+  renderValuation();
+}
+
+// ---------- TEAM PARTNERS DECLARATION ----------
+function renderVitrine(){
+  const active = data.sponsors.filter(s=>['Ativo','Renovado'].includes(s.status));
+  const grid = document.getElementById('vitrine-grid');
+  if(!active.length){ grid.innerHTML = '<div class="empty-state">Nenhum parceiro ativo ainda.</div>'; return; }
+  grid.innerHTML = active.map(sp=>`
+    <div class="tier-card glass">
+      <h3>${sp.name}</h3>
+      <div style="font-size:12px; color:var(--gray); margin-bottom:10px;">${sp.cat||'—'}</div>
+      <span class="tier ${cls(sp.tier)}">${sp.tier}</span>
+      <div style="margin-top:14px; font-size:12px; color:var(--gray); line-height:1.8;">
+        Período: ${sp.start||'—'} a ${sp.end||'—'}<br>
+        Tipo: ${sp.contribType||'Dinheiro'}<br>
+        Status: ${sp.status}
+      </div>
+    </div>`).join('');
+}
+
+// ---------- PARCEIROS (Patrocinador / Parceiro / Apoiador) ----------
+let parceirosFilter = 'Todos';
+function renderParceiros(){
+  const tipos = ['Todos','Patrocinador','Parceiro','Apoiador'];
+  document.getElementById('parceiros-filters').innerHTML = tipos.map(t=>
+    `<button class="chip ${parceirosFilter===t?'active':''}" data-pf="${t}">${t}${t!=='Todos' ? 's' : ''}</button>`).join('');
+  document.querySelectorAll('#parceiros-filters .chip').forEach(el=>{
+    el.addEventListener('click', ()=>{ parceirosFilter = el.dataset.pf; renderParceiros(); });
+  });
+
+  const list = parceirosFilter==='Todos' ? data.sponsors : data.sponsors.filter(s=>(s.relationType||'Patrocinador')===parceirosFilter);
+  const grid = document.getElementById('parceiros-grid');
+  if(!list.length){ grid.innerHTML = '<div class="empty-state">Nenhum registro nessa categoria ainda.</div>'; return; }
+  grid.innerHTML = list.map(sp=>`
+    <div class="s-card glass" data-id="${sp.id}">
+      <div class="s-top">
+        <div><div class="s-name">${sp.name}</div><div class="s-cat">${sp.cat||'—'}</div></div>
+        <span class="tier ${cls(sp.tier)}">${sp.tier}</span>
+      </div>
+      <div style="font-size:11px; color:var(--red); font-weight:600; margin-bottom:10px;">${sp.relationType||'Patrocinador'}</div>
+      <div style="font-size:11.5px; color:var(--gray); line-height:1.8;">
+        Contribuição: ${sp.contribType||'Dinheiro'}${sp.contribDesc ? ' — '+sp.contribDesc : ''}<br>
+        Status: <span class="status ${cls(sp.status)}">${sp.status}</span>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('.s-card').forEach(el=>{
+    el.addEventListener('click', ()=> openDetail(el.dataset.id));
+  });
+}
+
+// ---------- USP / UVP / OPORTUNIDADES ----------
+function renderProposta(){
+  document.getElementById('usp-text').value = data.usp;
+  document.getElementById('uvp-text').value = data.uvp;
+  const grid = document.getElementById('opp-grid');
+  grid.innerHTML = data.opportunities.map((o,i)=>`
+    <div class="s-card glass">
+      <div class="s-top"><div class="s-name">${o.name}</div><button class="btn ghost sm" data-del-opp="${i}">✕</button></div>
+      <textarea data-opp-desc="${i}" placeholder="Como essa oportunidade funciona na prática..." style="width:100%; min-height:70px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:9px; color:var(--white); padding:10px; font-family:var(--font); font-size:12px;">${o.desc||''}</textarea>
+    </div>`).join('');
+  document.querySelectorAll('[data-del-opp]').forEach(btn=>btn.addEventListener('click',()=>{
+    data.opportunities.splice(parseInt(btn.dataset.delOpp),1); saveData(); renderProposta();
+  }));
+  document.querySelectorAll('[data-opp-desc]').forEach(ta=>ta.addEventListener('blur',()=>{
+    data.opportunities[parseInt(ta.dataset.oppDesc)].desc = ta.value; saveData();
+  }));
+}
+document.getElementById('usp-text').addEventListener('blur', ()=>{ data.usp = document.getElementById('usp-text').value; saveData(); });
+document.getElementById('uvp-text').addEventListener('blur', ()=>{ data.uvp = document.getElementById('uvp-text').value; saveData(); });
+document.getElementById('btn-new-opp').addEventListener('click', ()=> document.getElementById('new-opp-form').style.display='block');
+document.getElementById('form-opp-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('opf-name').value.trim();
+  if(!name) return;
+  data.opportunities.push({name, desc:''});
+  saveData();
+  document.getElementById('form-opp').reset();
+  document.getElementById('new-opp-form').style.display='none';
+  renderProposta();
+});
+
+// ---------- 7 PILARES ----------
+function renderPyramid(){
+  const container = document.getElementById('pyramid-container');
+  if(!container) return;
+  const slots = 7;
+  const names = Array.from({length:slots}, (_,i)=> (data.pillars[i] && data.pillars[i].name) ? data.pillars[i].name : `Pilar ${i+1}`);
+  const W = 620, H = 420, apexW = 30, baseW = 560, cx = W/2;
+  const bandH = H/slots;
+  // shades from dark red (base) to light (apex), reversed so apex is brightest
+  const shades = ['#7a0316','#8f0419','#a4051c','#b9061f','#ce0722','#e10a2b','#f23a54'];
+  let svg = `<svg viewBox="0 0 ${W} ${H+30}" width="100%" style="max-width:640px;" xmlns="http://www.w3.org/2000/svg">`;
+  for(let i=0; i<slots; i++){
+    // i=0 is the top band (apex), i=6 is the bottom band (base)
+    const tTop = i/slots, tBot = (i+1)/slots;
+    const hwTop = (apexW/2) + tTop*((baseW-apexW)/2);
+    const hwBot = (apexW/2) + tBot*((baseW-apexW)/2);
+    const yTop = i*bandH, yBot = (i+1)*bandH;
+    const points = `${cx-hwTop},${yTop} ${cx+hwTop},${yTop} ${cx+hwBot},${yBot} ${cx-hwBot},${yBot}`;
+    const fill = shades[slots-1-i];
+    const labelY = (yTop+yBot)/2 + 5;
+    svg += `<polygon points="${points}" fill="${fill}" stroke="#ffffff" stroke-width="2" style="cursor:pointer;" data-pyr-idx="${i}"/>`;
+    svg += `<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#ffffff" style="pointer-events:none;">${escapeXml(names[i])}</text>`;
+  }
+  svg += `<text x="${cx}" y="${H+22}" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" fill="var(--gray)">clique em um nível pra editar o pilar</text>`;
+  svg += `</svg>`;
+  container.innerHTML = svg;
+  container.querySelectorAll('[data-pyr-idx]').forEach(poly=>{
+    poly.addEventListener('click', ()=>{
+      const idx = parseInt(poly.dataset.pyrIdx);
+      while(data.pillars.length <= idx){ data.pillars.push({ name:`Pilar ${data.pillars.length+1}`, desc:'', benefit:'', activations:'', kpi:'' }); }
+      saveData(); renderPillars(); renderPyramid();
+      const card = document.querySelectorAll('#pillar-grid .s-card')[idx];
+      if(card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+    });
+  });
+}
+function escapeXml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderPillars(){
+  const grid = document.getElementById('pillar-grid');
+  if(!data.pillars.length){ grid.innerHTML = '<div class="empty-state">Nenhum pilar cadastrado ainda. Clique em "+ Pilar" pra começar.</div>'; return; }
+  grid.innerHTML = data.pillars.map((p,i)=>`
+    <div class="s-card glass">
+      <div class="s-top">
+        <input type="text" data-pillar-name="${i}" value="${p.name}" style="background:transparent; border:none; color:var(--white); font-weight:600; font-size:14px; width:80%;">
+        <button class="btn ghost sm" data-del-pillar="${i}">✕</button>
+      </div>
+      <div class="field" style="margin-bottom:8px;"><label>Descrição</label><textarea data-pillar-desc="${i}" style="min-height:50px;">${p.desc||''}</textarea></div>
+      <div class="field" style="margin-bottom:8px;"><label>Benefício pro patrocinador</label><textarea data-pillar-benefit="${i}" style="min-height:40px;">${p.benefit||''}</textarea></div>
+      <div class="field" style="margin-bottom:8px;"><label>Exemplos de ativação</label><textarea data-pillar-activ="${i}" style="min-height:40px;">${p.activations||''}</textarea></div>
+      <div class="field"><label>Indicadores de desempenho</label><input type="text" data-pillar-kpi="${i}" value="${p.kpi||''}"></div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-pillar-name]').forEach(el=>el.addEventListener('blur',()=>{ data.pillars[el.dataset.pillarName].name=el.value; saveData(); }));
+  grid.querySelectorAll('[data-pillar-desc]').forEach(el=>el.addEventListener('blur',()=>{ data.pillars[el.dataset.pillarDesc].desc=el.value; saveData(); }));
+  grid.querySelectorAll('[data-pillar-benefit]').forEach(el=>el.addEventListener('blur',()=>{ data.pillars[el.dataset.pillarBenefit].benefit=el.value; saveData(); }));
+  grid.querySelectorAll('[data-pillar-activ]').forEach(el=>el.addEventListener('blur',()=>{ data.pillars[el.dataset.pillarActiv].activations=el.value; saveData(); }));
+  grid.querySelectorAll('[data-pillar-kpi]').forEach(el=>el.addEventListener('blur',()=>{ data.pillars[el.dataset.pillarKpi].kpi=el.value; saveData(); }));
+  grid.querySelectorAll('[data-del-pillar]').forEach(btn=>btn.addEventListener('click',()=>{ data.pillars.splice(parseInt(btn.dataset.delPillar),1); saveData(); renderPillars(); }));
+}
+document.getElementById('btn-new-pillar').addEventListener('click', ()=> document.getElementById('new-pillar-form').style.display='block');
+document.getElementById('cancel-new-pillar').addEventListener('click', ()=> document.getElementById('new-pillar-form').style.display='none');
+document.getElementById('form-pillar-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('pf-name').value.trim();
+  if(!name) return;
+  data.pillars.push({ name, desc:'', benefit:'', activations:'', kpi:'' });
+  saveData();
+  document.getElementById('form-pillar').reset();
+  document.getElementById('new-pillar-form').style.display='none';
+  renderPillars();
+});
+
+// ---------- SUBMARCAS ----------
+function renderProjects(){
+  const grid = document.getElementById('project-grid');
+  if(!data.projects.length){ grid.innerHTML = '<div class="empty-state">Nenhum projeto interno cadastrado ainda.</div>'; return; }
+  grid.innerHTML = data.projects.map((p,i)=>`
+    <div class="s-card glass">
+      <div class="s-top"><div class="s-name">${p.name}</div><button class="btn ghost sm" data-del-proj="${i}">✕</button></div>
+      <div style="font-size:11.5px; color:var(--gray); line-height:1.8;">
+        Objetivo: ${p.objetivo||'—'}<br>Responsável: ${p.responsavel||'—'}<br>
+        Valor disponibilizado: <strong>${fmtBRL(p.valorDisponibilizado)}</strong><br>
+        Status: <span class="status ${cls(p.status)}">${p.status||'—'}</span><br>
+        Prazo: ${p.prazo||'—'}<br>Indicadores: ${p.indicadores||'—'}<br>
+        Resultados: ${p.resultados||'—'}
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('[data-del-proj]').forEach(btn=>btn.addEventListener('click',()=>{ data.projects.splice(parseInt(btn.dataset.delProj),1); saveData(); renderProjects(); }));
+}
+document.getElementById('btn-new-project').addEventListener('click', ()=> document.getElementById('new-project-form').style.display='block');
+document.getElementById('cancel-new-project').addEventListener('click', ()=> document.getElementById('new-project-form').style.display='none');
+document.getElementById('form-project-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('prf-name').value.trim();
+  if(!name) return;
+  data.projects.push({ name, objetivo:'', responsavel:'', status:'Em andamento', prazo:'', indicadores:'', resultados:'', evidencias:'', valorDisponibilizado: parseFloat(document.getElementById('prf-valor').value)||0 });
+  saveData();
+  document.getElementById('form-project').reset();
+  document.getElementById('new-project-form').style.display='none';
+  renderProjects();
+});
+
+// ---------- BRAND ACTIVATION ----------
+function renderActivations(){
+  const grid = document.getElementById('activation-grid');
+  if(!data.activations.length){ grid.innerHTML = '<div class="empty-state">Nenhuma ativação registrada ainda.</div>'; return; }
+  grid.innerHTML = data.activations.map((a,i)=>`
+    <div class="s-card glass">
+      <div class="s-top"><div class="s-name">${a.local||'Ativação'}</div><button class="btn ghost sm" data-del-act="${i}">✕</button></div>
+      <div style="font-size:11.5px; color:var(--gray); line-height:1.8;">
+        Patrocinador: <strong>${a.sponsorName||'geral / não vinculado'}</strong><br>
+        Data: ${a.data||'—'}<br>Descrição: ${a.desc||'—'}<br>
+        Público atingido: ${fmtNum(a.publico)}<br>Alcance: ${fmtNum(a.alcance)}<br>
+        Resultado: ${a.resultado||'—'}<br>ROI: ${fmtBRL(a.roi)}
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('[data-del-act]').forEach(btn=>btn.addEventListener('click',()=>{ data.activations.splice(parseInt(btn.dataset.delAct),1); saveData(); renderActivations(); }));
+}
+document.getElementById('btn-new-activation').addEventListener('click', ()=> document.getElementById('new-activation-form').style.display='block');
+document.getElementById('cancel-new-activation').addEventListener('click', ()=> document.getElementById('new-activation-form').style.display='none');
+document.getElementById('form-activation-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const local = document.getElementById('acf-local').value.trim();
+  if(!local) return;
+  const spId = document.getElementById('acf-sponsor').value;
+  const sp = data.sponsors.find(s=>s.id===spId);
+  data.activations.push({ local, data:'', desc: document.getElementById('acf-desc').value.trim(), sponsorId: spId||'', sponsorName: sp ? sp.name : '', publico:0, alcance:0, resultado:'', roi:0, status:'Realizada' });
+  saveData();
+  document.getElementById('form-activation').reset();
+  document.getElementById('new-activation-form').style.display='none';
+  renderActivations();
+});
+
+// ---------- CASE STUDIES ----------
+function renderCases(){
+  const grid = document.getElementById('case-grid');
+  if(!data.cases.length){ grid.innerHTML = '<div class="empty-state">Nenhum case cadastrado ainda.</div>'; return; }
+  grid.innerHTML = data.cases.map((c,i)=>`
+    <div class="s-card glass">
+      <div class="s-top"><div class="s-name">${c.sponsor||'Case'}</div><button class="btn ghost sm" data-del-case="${i}">✕</button></div>
+      <div style="font-size:11.5px; color:var(--gray); line-height:1.8;">
+        Objetivo: ${c.problema||'—'}<br>Estratégia: ${c.estrategia||'—'}<br>
+        Resultado: ${c.resultado||'—'}<br>ROI: ${fmtBRL(c.roi)} · Alcance: ${fmtNum(c.alcance)}<br>
+        ${c.depoimento ? `Depoimento: "${c.depoimento}"` : ''}
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('[data-del-case]').forEach(btn=>btn.addEventListener('click',()=>{ data.cases.splice(parseInt(btn.dataset.delCase),1); saveData(); renderCases(); }));
+}
+document.getElementById('btn-new-case').addEventListener('click', ()=> document.getElementById('new-case-form').style.display='block');
+document.getElementById('cancel-new-case').addEventListener('click', ()=> document.getElementById('new-case-form').style.display='none');
+document.getElementById('form-case-submit').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const sponsorName = document.getElementById('csf-sponsor').value.trim();
+  if(!sponsorName) return;
+  data.cases.push({ sponsor:sponsorName, problema:'', estrategia:'', ativacao:'', entregas:'', resultado:'', roi:0, roo:'', alcance:0, depoimento:'', evidencias:'' });
+  saveData();
+  document.getElementById('form-case').reset();
+  document.getElementById('new-case-form').style.display='none';
+  renderCases();
+});
+
+// ---------- RETROALIMENTAÇÃO DO CICLO ----------
+function renderCiclo(){
+  const s = data.sponsors;
+  const complianceAvg = s.length ? (s.reduce((a,x)=>a+sponsorCompliance(x),0)/s.length) : 0;
+  const npsValues = s.filter(x=>x.feedback && x.feedback.rec!=='' && x.feedback.rec!==undefined).map(x=>Math.round((Number(x.feedback.rec)-5)*20));
+  const avgNps = npsValues.length ? (npsValues.reduce((a,b)=>a+b,0)/npsValues.length) : null;
+  const decided = s.filter(x=>['Ativo','Renovado','Perdido'].includes(x.status));
+  const renewed = s.filter(x=>x.status==='Renovado').length;
+  const renewalRate = decided.length ? (renewed/decided.length*100) : 0;
+  const totalRoi = s.reduce((a,x)=>a+((x.roiEntries||[]).reduce((p,r)=>p+(Number(r.retorno)||0),0)),0);
+  document.getElementById('ciclo-kpis').innerHTML = `
+    <div class="kpi glass"><div class="l">Compliance médio</div><div class="v">${complianceAvg.toFixed(0)}%</div></div>
+    <div class="kpi glass"><div class="l">NPS médio</div><div class="v">${avgNps===null?'—':avgNps.toFixed(0)}</div></div>
+    <div class="kpi glass"><div class="l">Taxa de renovação</div><div class="v red">${renewalRate.toFixed(0)}%</div></div>
+    <div class="kpi glass"><div class="l">ROI total do ciclo</div><div class="v green">${fmtBRL(totalRoi)}</div></div>
+  `;
+  document.getElementById('ciclo-notes').value = data.cycleNotes;
+
+  const container = document.getElementById('ciclo-sponsors');
+  if(!s.length){ container.innerHTML = '<div class="empty-row">Nenhum patrocinador cadastrado ainda.</div>'; return; }
+  container.innerHTML = s.map((sp,i)=>`
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12.5px; font-weight:600; margin-bottom:6px;">${sp.name} <span style="font-weight:400; color:var(--gray); font-size:11px;">(${sp.status})</span></div>
+      <textarea data-sponsor-cycle="${sp.id}" placeholder="O que aprendemos com esse patrocinador pro próximo ciclo..." style="width:100%; min-height:70px; background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:9px; color:var(--white); padding:10px; font-family:var(--font); font-size:12.5px;">${sp.cycleNotes||''}</textarea>
+    </div>`).join('');
+  container.querySelectorAll('[data-sponsor-cycle]').forEach(ta=>{
+    ta.addEventListener('blur', ()=>{
+      const sp = getSponsor(ta.dataset.sponsorCycle);
+      if(sp){ sp.cycleNotes = ta.value; saveData(); }
+    });
+  });
+}
+document.getElementById('ciclo-notes').addEventListener('blur', ()=>{ data.cycleNotes = document.getElementById('ciclo-notes').value; saveData(); });
+
+// ---------- AIDA ----------
+const AIDA_STAGES = ['Atenção','Interesse','Desejo','Ação'];
+function renderAida(){
+  document.getElementById('aida-atencao').value = data.aida.atencao;
+  document.getElementById('aida-interesse').value = data.aida.interesse;
+  document.getElementById('aida-desejo').value = data.aida.desejo;
+  document.getElementById('aida-acao').value = data.aida.acao;
+
+  const prospects = [
+    ...data.leads.map(l=>({id:l.id, name:l.name, origin:l.source||'Lead', stage:l.aidaStage||'Atenção', type:'lead'})),
+    ...data.sponsors.filter(s=>s.status==='Negociação').map(s=>({id:s.id, name:s.name, origin:'Negociação', stage:s.aidaStage||'Atenção', type:'sponsor'})),
+  ];
+  const tbody = document.getElementById('aida-tbody');
+  if(!prospects.length){ tbody.innerHTML = '<tr><td colspan="3" class="empty-row">Nenhum prospect em andamento ainda.</td></tr>'; return; }
+  tbody.innerHTML = prospects.map(p=>`
+    <tr>
+      <td>${p.name}</td><td>${p.origin}</td>
+      <td><select data-aida-id="${p.id}" data-aida-type="${p.type}">
+        ${AIDA_STAGES.map(st=>`<option ${st===p.stage?'selected':''}>${st}</option>`).join('')}
+      </select></td>
+    </tr>`).join('');
+  document.querySelectorAll('[data-aida-id]').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const list = sel.dataset.aidaType==='lead' ? data.leads : data.sponsors;
+      const item = list.find(x=>x.id===sel.dataset.aidaId);
+      if(item){ item.aidaStage = sel.value; saveData(); }
+    });
+  });
+}
+['aida-atencao','aida-interesse','aida-desejo','aida-acao'].forEach(id=>{
+  document.getElementById(id).addEventListener('blur', ()=>{
+    const key = id.replace('aida-','');
+    data.aida[key] = document.getElementById(id).value;
+    saveData();
+  });
+});
+
+// ---------- VALUATION DE ATIVOS ----------
+function bindVal(id, key, isFloat){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.value = data.valuation[key];
+  el.addEventListener('blur', ()=>{
+    data.valuation[key] = isFloat===false ? el.value : (parseFloat(el.value)||0);
+    saveData();
+  });
+}
+function renderValuation(){
+  const v = data.valuation;
+  bindVal('val-alcance','alcance'); bindVal('val-cpm-min','cpmMin'); bindVal('val-cpm-max','cpmMax');
+  bindVal('val-audiencia','audiencia'); bindVal('val-mensal','mensal');
+  bindVal('val-fluxo','fluxo'); bindVal('val-cpm-presencial','cpmPresencial');
+  bindVal('val-selo','selo'); bindVal('val-midia','midia'); bindVal('val-mascote','mascote');
+  bindVal('val-fisico','fisico');
+  const atEl = document.getElementById('val-ativos-fisicos');
+  if(atEl){ atEl.value = v.ativosFisicos; atEl.addEventListener('blur', ()=>{ v.ativosFisicos = atEl.value; saveData(); }); }
+
+  const tbody = document.getElementById('prod-tbody');
+  tbody.innerHTML = v.producao.map((p,i)=>`
+    <tr>
+      <td><input type="text" data-prod-tipo="${i}" value="${p.tipo}" style="background:transparent; border:none; color:var(--white); font-family:var(--font); font-size:12.5px; width:100%;"></td>
+      <td><input type="text" data-prod-comp="${i}" value="${p.complexidade}" style="background:transparent; border:none; color:var(--white); font-family:var(--font); font-size:12.5px; width:80px;"></td>
+      <td><input type="text" data-prod-valor="${i}" value="${p.valor}" style="background:transparent; border:none; color:var(--white); font-family:var(--font); font-size:12.5px; width:150px;"></td>
+      <td><button class="btn ghost sm" data-prod-del="${i}">✕</button></td>
+    </tr>`).join('');
+  tbody.querySelectorAll('[data-prod-tipo]').forEach(el=>el.addEventListener('blur',()=>{ v.producao[el.dataset.prodTipo].tipo=el.value; saveData(); }));
+  tbody.querySelectorAll('[data-prod-comp]').forEach(el=>el.addEventListener('blur',()=>{ v.producao[el.dataset.prodComp].complexidade=el.value; saveData(); }));
+  tbody.querySelectorAll('[data-prod-valor]').forEach(el=>el.addEventListener('blur',()=>{ v.producao[el.dataset.prodValor].valor=el.value; saveData(); }));
+  tbody.querySelectorAll('[data-prod-del]').forEach(btn=>btn.addEventListener('click',()=>{ v.producao.splice(parseInt(btn.dataset.prodDel),1); saveData(); renderValuation(); }));
+
+  document.getElementById('calc-impressoes').value = document.getElementById('calc-impressoes').value || v.alcance;
+  document.getElementById('calc-visitantes').value = document.getElementById('calc-visitantes').value || v.fluxo;
+}
+document.getElementById('btn-new-prod').addEventListener('click', ()=>{
+  data.valuation.producao.push({tipo:'Novo item', complexidade:'Baixa', valor:'R$ 0,00'});
+  saveData(); renderValuation();
+});
+
+document.getElementById('btn-calc').addEventListener('click', ()=>{
+  const v = data.valuation;
+  const impressoes = parseFloat(document.getElementById('calc-impressoes').value)||0;
+  const visitantes = parseFloat(document.getElementById('calc-visitantes').value)||0;
+  const producaoBase = parseFloat(document.getElementById('calc-producao').value)||0;
+  const markup = parseFloat(document.getElementById('calc-markup').value)||1;
+  const fa = parseFloat(document.getElementById('calc-fa').value)||1;
+  const tpe = parseFloat(document.getElementById('calc-tpe').value)||0;
+
+  const ativoDigital = (impressoes/1000) * v.cpmDefault;
+  const exposicaoPresencial = (visitantes/1000) * v.cpmPresencial;
+  const relacionamento = (Number(v.selo)||0) + (Number(v.midia)||0) + (Number(v.mascote)||0);
+  const producaoAjustada = producaoBase * markup;
+  const valorBase = ativoDigital + exposicaoPresencial + relacionamento + producaoAjustada;
+  const valorAfinidade = valorBase * fa;
+  const valorFinal = valorAfinidade * (1 + tpe);
+
+  document.getElementById('calc-result').innerHTML = `
+    <div class="mini-kpis" style="grid-template-columns:repeat(2,1fr); margin-bottom:14px;">
+      <div class="mini-kpi"><div class="l">Ativo Digital</div><div class="v">${fmtBRL(ativoDigital)}</div></div>
+      <div class="mini-kpi"><div class="l">Exposição Presencial</div><div class="v">${fmtBRL(exposicaoPresencial)}</div></div>
+      <div class="mini-kpi"><div class="l">Relacionamento e Autoridade</div><div class="v">${fmtBRL(relacionamento)}</div></div>
+      <div class="mini-kpi"><div class="l">Produção x Markup</div><div class="v">${fmtBRL(producaoAjustada)}</div></div>
+    </div>
+    <div style="background:var(--glass-strong); border-radius:12px; padding:16px; font-size:13px; line-height:1.9;">
+      Valor Base (soma dos ativos): <strong>${fmtBRL(valorBase)}</strong><br>
+      × Fator de Afinidade (${fa}): <strong>${fmtBRL(valorAfinidade)}</strong><br>
+      × (1 + TPE ${(tpe*100).toFixed(0)}%): <strong style="color:var(--red); font-size:17px;">Valor Final: ${fmtBRL(valorFinal)}</strong>
+    </div>
+    <div class="form-grid" style="margin-top:16px;">
+      <div class="field"><label>Aplicar esse valor a uma cota existente</label>
+        <select id="calc-apply-tier">${data.tiers.map((t,i)=>`<option value="${i}">${t.name}</option>`).join('')}</select>
+      </div>
+      <div class="field"><button type="button" class="btn sm" id="btn-apply-tier" style="margin-top:22px;">Aplicar à cota</button></div>
+    </div>
+  `;
+  const applyBtn = document.getElementById('btn-apply-tier');
+  if(applyBtn){
+    applyBtn.addEventListener('click', ()=>{
+      const idx = parseInt(document.getElementById('calc-apply-tier').value);
+      if(data.tiers[idx]){ data.tiers[idx].value = Math.round(valorFinal*100)/100; saveData(); renderTiers(); }
+    });
+  }
+});
+
+loadData();
+</script>
+</body>
+</html>

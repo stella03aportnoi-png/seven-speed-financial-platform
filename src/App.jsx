@@ -1771,6 +1771,39 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+/* ================= HUB SCREEN ================= */
+function HubScreen({ user, onSelect, onLogout }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ background: `linear-gradient(135deg, #0b0b0d, #1f2937)` }}>
+      <div className="absolute top-6 right-6">
+        <button onClick={onLogout} className="text-gray-400 hover:text-white text-sm font-semibold flex items-center gap-2">
+          <LogOut size={16} /> Sair
+        </button>
+      </div>
+      
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl text-white mb-6 shadow-lg" style={{ backgroundColor: RED }}>7S</div>
+      <h1 className="text-white text-3xl font-bold mb-2">Portal Seven Speed</h1>
+      <p className="text-gray-400 text-sm mb-10">Olá, {user.name}. O que deseja aceder?</p>
+      
+      <div className="flex gap-6 flex-wrap justify-center">
+        {/* Quadrado 1: Financeiro */}
+        <Card className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white" onClick={() => onSelect('financial')}>
+          <Wallet size={56} color="#D90429" className="mb-4" />
+          <h2 className="text-xl font-bold text-gray-800">Financeiro</h2>
+          <p className="text-xs text-gray-500 text-center mt-2">ERP, Orçamentos, Cash Flow e Transações</p>
+        </Card>
+        
+        {/* Quadrado 2: Captação */}
+        <Card className="p-8 flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition w-64 h-64 bg-white" onClick={() => onSelect('captacao')}>
+          <Target size={56} color="#D90429" className="mb-4" />
+          <h2 className="text-xl font-bold text-gray-800">Captação</h2>
+          <p className="text-xs text-gray-500 text-center mt-2">Patrocinadores, Hierarquia, CRM e AIDA</p>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 /* ================= APP ================= */
 function AppInner() {
   const isDesktop = useIsDesktop();
@@ -1782,6 +1815,7 @@ function AppInner() {
   const [page, setPage] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState({});
+  const [activeModule, setActiveModule] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -1856,6 +1890,31 @@ function AppInner() {
   const ws = workspaces[session.id] || emptyWorkspace();
   const canEdit = session.role !== "Read Only";
   const pageLabel = (MENU.find(m => m.key === page)?.label) || (page === "users" ? "User Management" : "Dashboard");
+
+  // Se o utilizador não escolheu nenhum módulo, mostra os 2 quadrados
+  if (!activeModule) {
+    return <HubScreen user={session} onSelect={setActiveModule} onLogout={handleLogout} />;
+  }
+
+  // Se o utilizador escolheu a Captação, mostramos o ficheiro HTML dentro de um iframe
+  if (activeModule === 'captacao') {
+    return (
+      <div className="w-full h-screen flex flex-col">
+        {/* Barra superior preta para conseguir voltar ao menu */}
+        <div className="bg-[#0b0b0d] text-white px-5 py-3 flex justify-between items-center shadow-md z-10">
+          <span className="font-bold text-sm flex items-center gap-3">
+            <div className="w-7 h-7 rounded flex items-center justify-center font-black text-xs" style={{ backgroundColor: RED }}>7S</div>
+            Sistema de Captação e CRM
+          </span>
+          <button onClick={() => setActiveModule(null)} className="text-xs font-semibold px-4 py-2 rounded transition" style={{ backgroundColor: RED }}>
+            Voltar ao Menu
+          </button>
+        </div>
+        {/* Carrega o HTML da captação em ecrã inteiro */}
+        <iframe src="/captacao.html" className="w-full flex-1 border-0" title="Captação Seven Speed"></iframe>
+      </div>
+    );
+  }
 
   let content;
   if (page === "dashboard") content = <DashboardPage ws={ws} />;
